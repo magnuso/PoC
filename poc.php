@@ -12,7 +12,7 @@ http://www.poc-online.net/
 
 ini_set('variables_order', 'EGPCS');
 
-set_include_path('poc');
+set_include_path('include');
 
 include 'pocInclude.php';
 
