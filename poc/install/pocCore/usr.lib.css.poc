@@ -1,0 +1,63 @@
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/lib/css
+-- pocPrivileges: rosiud rosiud ros---
+-- pocGroup: user
+-- pocAttributeChar: _mime, "text/html; charset=utf-8"
+
+*******************************************************************************/
+
+body { text-align: left; margin: 0em auto; padding: 0em; background: #fff; }
+
+div, ul, ol, form { padding: 0em; margin: 0em; }
+h1, h2, h3, h4, h5, h6, p, pre { padding: 0em; }
+
+#allDiv { position: absolute; top: 0em; left: 1em; right: 1em; min-height: 100%; }
+
+#topDiv { position: relative; height: 8em; padding-top: 1em; margin: 1em 0em 1em 0em; border-bottom: 1px solid gray; }
+#topDiv :first-child { margin-top: 0em; }
+#topDiv .navi { position: absolute; left: 0em; bottom: 1em; padding: 0em; margin: 0em; list-style:none inside; }
+#topDiv .navi li { margin-right: 1em; float: left; }
+#topDiv .user { position: absolute; right: 0em; bottom: 1em; padding: 0em; margin: 0em; list-style:none inside; }
+#topDiv .user li { margin-left: 1em; height: 1.5em; text-align: right; }
+#topDiv .here { font-weight: bold; }
+
+#sideDiv { position: absolute; width: 13em; left: 0em; top: 11em; bottom: 4em; padding-right: 1em; border-right: 1px solid gray; }
+#sideDiv .navi { list-style:none inside; }
+#sideDiv .navi li { padding: 0em; margin-bottom: .5em; }
+#sideDiv .here { font-weight: bold; }
+#sideDiv .noNavi { color: silver; }
+
+#contentDiv { position: relative; margin: 0em 0em 4em 14em; padding-left: 1em; }
+#contentDiv :first-child { margin-top: 0em; }
+#contentDiv .navi { list-style:none inside; }
+#contentDiv .navi li { margin: 0em 1em 0em 0em; float: left; }
+#contentDiv ul { list-style: disc outside; }
+#contentDiv li { margin: 0em 0em 1em 1em; }
+
+
+#footerDiv { position: absolute; bottom: 0em; left: 0em; right: 0em; height: 1em; padding: 1em 0em 1em 0em; margin-top: 1em; border-top: 1px solid gray; }
+
+.w120 { width: 8em; }
+
+.fll { float: left; }
+.flr { float: right; }
+
+.borderLeft { border-left: 1px solid gray; padding-left: 1em; margin-left: 1em; }
+.borderRight { border-right: 1px solid gray; padding-right: 1em; margin-right: 1em; }
+.borderBottom { border-bottom: 1px solid gray; padding-bottom: 1em; margin-bottom: 1em; }
+.borderTop { border-top: 1px solid gray; padding-top: 1em; margin-top: 1em; }
+
+.noUl { padding: 0em; margin: 0em; list-style:none inside; }
+.noUl li { float: left; margin-right: 1em; }
+.noUl li.flr { float: right; margin-right: 0em; margin-left: 1em; }
+
+.brClear { clear: both; }

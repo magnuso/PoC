@@ -1,0 +1,49 @@
+<?PHP
+
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/lib/template
+-- pocPrivileges: rosiud rosiud ros---
+-- pocGroup: user
+-- pocAttributeChar: _mime, "text/html; charset=utf-8"
+
+*******************************************************************************/
+
+$poc = array_shift($params);
+
+if ($error = pocError::fetch())
+  header('HTTP/1.0 ' . $error->code . ' ' . $error->msg);
+
+header("Content-Type: text/html; charset=utf-8");
+
+################################################################################
+
+?><!DOCTYPE html>
+<html>
+<head>
+  <base href="<?PHP $u = new pocPath(''); echo $u->url; ?>" />
+  <title><?PHP pocEcho::echoHtmlChars($poc->getTitle()); ?></title>
+</head>
+<body>
+<div>
+  <form action="<?PHP $u = new pocPath('.'); echo $u->url; ?>" method="POST">
+    <input type="text" name="login" /><br />
+    <input type="password" name="password" />
+    <input type="submit" name="ok" value="login" />
+  </form>
+</div>
+<div>
+
+<?PHP $poc->run(); ?>
+
+</div>
+</body>
+</html>

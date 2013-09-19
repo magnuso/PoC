@@ -1,0 +1,80 @@
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/edit/css
+-- pocUser: admin
+-- pocGroup: user
+-- pocPrivileges: rosiud ros--- ------
+-- pocTitle: PoC-Edit
+
+*******************************************************************************/
+
+body { font: 100.01%/120.01% Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: #eee; margin: 0px auto; padding: 0px; }
+
+div, ul, ol, li, textarea, label, table, td, tr, form { margin: 0px; padding: 0px; border: 0px; }
+
+table { padding: 14px; background: #eee; }
+td { min-width: 48px; padding: 2px; text-align: center; }
+td.ltd { text-align: left; }
+td.rtd { text-align: right; }
+
+a:link { color: #69c; text-decoration: none; }
+a:visited { color: #369; }
+a:focus { color: #69c; }
+a:hover { color: #69c; text-decoration: underline; }
+a:active { color: #f00; }
+
+#allDiv { position: relative; min-width: 100%; min-height: 100%; }
+#topBar { position: fixed; top: 0px; right: 0px; left: 0px; padding: 8px; background: #eee; }
+
+.mainDiv { position: fixed; top: 0px; right: 0px; left: 0px; bottom: 0px; margin: 96px 8px 48px 8px; padding: 16px; border: 1px solid #999; background: #fff; }
+
+#pocDiv { visibility: hidden; }
+#contentDiv { visibility: visible; }
+#privilegeDiv { visibility: hidden; }
+#attributesDiv { visibility: hidden; }
+
+ul .noUl { display: inline-block; float: left; }
+.noUl li { display: inline-block; float: left; list-style: none inside; }
+
+#topUl { width: 100%; }
+#topUl li { vertical-align:bottom; }
+
+
+.littleInput li  { margin-right: 8px; }
+.littleInput label  { display: block; font-size: 70%; }
+
+.fll { float: left; margin-right: 8px; }
+.flr { float: right; margin-left: 8px; }
+.tar { text-align: right; }
+
+#content { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; }
+
+.tabBar { position: absolute; top: -30px; right: 0px; left: 0px; height: 31px; overflow: hidden; }
+.tabBar li { min-width: 96px; height: 33px; margin: 0px 8px 0px 16px; padding: 6px 16px 0px 16px; border: 1px solid #999; background: #ccc; text-align: center; font-weight: bold; }
+.tabBar li.here { background: #fff; }
+.tabBar a:link { color: #333; text-decoration: none; }
+.tabBar a:visited { color: #333; }
+.tabBar a:hover { color: #999; text-decoration: underline; }
+
+.bottomBar { position: fixed; right: 0px; left: 0px; bottom: 0px; height: 24px; padding: 12px; overflow: hidden; }
+
+#selectTable { width: 100%; margin: 0px; padding: 4px; }
+#selectTable textarea, #selectTable input { border: 1px solid #999; }
+#selectTable td, #selectTable th { text-align: left; padding: 2px 8px 2px 8px; }
+#selectTable td.tar { text-align: right; }
+#selectTable th { font-weight: normal; background: #ccc; }
+#selectTable tr { padding: 2px; max-height: 3em; overflow: hidden; }
+#selectTable tr:hover { background: #ddd; }
+#selectTable a:link { font-weight: normal; }
+.selectHolder { display: inline-block; margin: 0px; padding: 0px; width: 36px; text-align: center; }
+.nameHolder { display: inline-block; min-width: 120px; margin: 0px 8px 0px 8px; border-right: 1px solid #eee; }
+
+.overDiv { width: 100%; height: 100%; overflow: scroll; }

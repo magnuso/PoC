@@ -1,0 +1,132 @@
+<?PHP
+
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/edit/chown
+-- pocTitle: PoC-Chown
+-- pocGroup: user
+-- pocPrivileges: rosiud ros--- ------
+
+*******************************************************************************/
+
+$closeWindow = FALSE;
+
+if ($thePoc = poc::open(pocEnv::$request['poc'])) {
+
+  if (pocEnv::$request['submitButton']) {
+    $thePoc->chown(pocEnv::$request['user'], pocEnv::$request['group'], pocEnv::$request['recursive']);
+    $closeWindow = TRUE;
+  }
+
+} else {
+  $thePoc = poc::open();
+  $closeWindow = TRUE;
+}
+
+header("Content-Type: text/html; charset=utf-8");
+
+?><!DOCTYPE html>
+<html>
+<head>
+  <base href="<?PHP $u->path = ''; echo $u->url; ?>" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title><?PHP pocEcho::echoHtmlChars("chown " . $thePoc->path); ?></title>
+  <style type="text/css">
+  <!--
+
+html, body { font: 1em/1.2em Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: #eee;
+     margin: 0em auto; padding: 0em; }
+
+form, img, div { margin: 0em; padding: 0em; border: 0em; }
+
+#allDiv { position: absolute; width: 100%; height: 100%; display: table; }
+
+#topDiv { height: 2em; display: table-row; }
+#bottomDiv { height: 2em; display: table-row; }
+
+#browseDiv { display: table-row; }
+
+.cellcell { display: table-cell; padding: 0.5em; text-align: center; vertical-align: middle; }
+
+.fTable { display: table; }
+.fRow { display: table-row; }
+.fCell { display: table-cell; padding: 0.2em; text-align: left; vertical-align: middle; }
+
+.wflr { float: right; width: 240px; }
+.flr { float: right; margin-left: .5em; }
+.fll { float: left; margin-right: .5em; }
+
+  -->
+  </style>
+  <script type="text/javascript">
+
+window.onload = function() {
+
+<?PHP
+
+foreach (pocError::fetchAll() as $error)
+  echo "window.alert('$error');\n";
+if ($closeWindow)
+  echo "window.close();\n";
+
+?>
+
+};
+
+
+
+  </script>
+</head>
+<body>
+<form name="theForm" action="<?PHP echo $u->url; ?>" method="post">
+  <div id="allDiv">
+    <div id="topDiv">
+      <div class="cellcell">
+        <h1>chown</h1>
+      </div>
+    </div>
+    <div id="browseDiv">
+      <div class="cellcell">
+        <div class="fTable" style="margin:auto;">
+          <div class="fRow">
+            <div class="fCell">poc:</div>
+            <div class="fCell"><?PHP echo $thePoc->path; ?></div>
+          </div>
+          <div class="fRow">
+            <div class="fCell"><label for="user">Benutzer</label>:&nbsp;</div>
+            <div class="fCell"><input type="text" name="user" value="<?PHP pocEcho::echoHtmlChars($thePoc->userName); ?>" /></div>
+          </div>
+          <div class="fRow">
+            <div class="fCell"><label for="group">Gruppe</label>:&nbsp;</div>
+            <div class="fCell"><input type="text" name="group" value="<?PHP pocEcho::echoHtmlChars($thePoc->groupName); ?>" /></div>
+          </div>
+          <div class="fRow">
+            <div class="fCell"><label for="recursive">rekursiv</label>:&nbsp;</div>
+            <div class="fCell"><input type="checkbox" name="recursive" /> Auf Unterobjekte anwenden.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="bottomDiv">
+      <div class="cellcell">
+        <input class="flr" type="submit" name="submitButton" value="OK" />
+        <input class="flr" type="button" name="cancel" value="Abbrechen" onclick="window.close();" />
+      </div>
+    </div>
+  </div>
+</form>
+</body>
+</html>
+<?PHP
+
+exit();
+
+?>

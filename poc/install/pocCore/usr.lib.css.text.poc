@@ -1,0 +1,37 @@
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/lib/css/text
+-- pocPrivileges: rosiud rosiud ros---
+-- pocGroup: user
+-- pocAttributeChar: _mime, "text/html; charset=utf-8"
+
+*******************************************************************************/
+
+body { font: 1em/1.4em Georgia, Times, "Times New Roman", serif; }
+
+h1, h2, h3, h4, h5 { margin-top: 1em; margin-bottom: 1em; }
+p, pre, h6 { margin-top: 0em; margin-bottom: 1em; }
+
+pre { font: 0.8em/1.4em "Lucida Console", "Lucida Sans Typewriter", Monaco, "Bitstream Vera Sans Mono", monospace;
+  background: #dde; padding: 1em; }
+
+.pocCode { font: 0.8em/1.4em "Lucida Console", "Lucida Sans Typewriter", Monaco, "Bitstream Vera Sans Mono", monospace;
+  background: #dde; padding: 0.1em; }
+
+a:link { text-decoration: none; color: #036; }
+a:visited { color: #336; }
+a:focus { color: #fff; background: #036; }
+a:hover { text-decoration: underline; }
+a:active { color: #00f; }
+
+.f70 { font: 75% Arial, "Helvetica Neue", Helvetica, sans-serif; }
+
+.achtung { background: #fcc; border: 1px solid red; padding: 1em; }

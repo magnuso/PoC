@@ -1,0 +1,77 @@
+<?PHP
+
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/edit/tabAttributes
+-- pocUser: admin
+-- pocGroup: user
+-- pocPrivileges: rosiud ros--- ------
+-- pocTitle: PoC-Edit
+
+*******************************************************************************/
+
+$thePoc = poc::open(pocEnv::$request['poc']);
+
+?>
+      <table id="selectTable" cellspacing="1">
+        <thead>
+          <tr>
+            <th width="25%" class="fc"><span class="selectHolder">&nbsp;</span><span class="nameHolder">Name</span>Titel</th>
+            <th width="2%">Inhalt</th>
+            <th width="2%">Wert</th>
+            <th>Soll</th>
+            <th>Beleg</th>
+            <th>erzeugt</th>
+            <th>geändert</th>
+          <tr>
+        <thead>
+        <tbody>
+<?PHP
+
+function listAttributes($attributes, $path) {
+  $u = new pocPath('./attribute', array('poc' => $path));
+  foreach ($attributes as $a) {
+    if (is_array($a)) {
+      listAttributes($a, $path);
+    } else {
+      $u['identifier'] = $a->identifier;
+?>
+          <tr>
+            <td class="fc"><span class="selectHolder"><strong><a href="#" onclick="return deletePocAttribute('<?PHP echo $a->identifier; ?>')">x</a></strong></span><a href="<?PHP echo $u->url; ?>" onclick="return launchPoc(this.href);"><span class="nameHolder"><?PHP echo $a->name; ?></span><?PHP pocEcho::echoHtmlChars($a->title); ?></a></td>
+            <td>
+              <?PHP $i = $a->createInput(); $i['name'] = $a->identifier; $i['onfocus'] = 'onFocusInput(this);'; $i->echoTag(); ?>
+            </td>
+            <td class="tar">
+              <?PHP echo $a->value; ?>
+            </td>
+            <td>
+              <?PHP if ($p = $a->debit) echo $p->path; ?>
+            </td>
+            <td>
+              <?PHP if ($p = $a->voucher) echo $p->path; ?>
+            </td>
+            <td>
+              <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $a->created) . ' ' . $a->createdByName; ?>
+            </td>
+            <td>
+              <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $a->modified) . ' ' . $a->modifiedByName; ?>
+            </td>
+          <tr>
+<?PHP
+    }
+  }
+}
+
+listAttributes($thePoc->attributes, $thePoc->path)
+
+?>
+        </tbody>
+      </table>

@@ -1,0 +1,230 @@
+<?PHP
+
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/edit/attribute
+-- pocUser: admin
+-- pocGroup: user
+-- pocPrivileges: rosiud ros--- ------
+-- pocTitle: PoC-Attribute
+
+*******************************************************************************/
+
+$closeWindow = FALSE;
+
+$debit = '';
+$voucher = '';
+$name = '';
+$title = '';
+$content = '';
+$value = 0.0;
+
+if (pocEnv::$request['poc']) {
+  if ($thePoc = poc::open(pocEnv::$request['poc'])) {
+    if (pocEnv::$request['identifier']) {
+      if ($theAttribute = $thePoc[pocEnv::$request['identifier']]) {
+        if (pocEnv::$request['submitButton']) {
+          $theAttribute->parse(pocEnv::$request['content']);
+          $theAttribute->title = pocEnv::$request['title'];
+          $theAttribute->debit = pocEnv::$request['debit'];
+          $theAttribute->voucher = pocEnv::$request['voucher'];
+          $theAttribute->value = pocEnv::$request['value'];
+          if ($theAttribute->update()) {
+            $closeWindow = TRUE;
+          } else {
+            $debit = pocEnv::$request['debit'];
+            $voucher = pocEnv::$request['voucher'];
+            $title = pocEnv::$request['title'];
+            $content = pocEnv::$request['content'];
+            $value = pocEnv::$request['value'];
+          }
+        } elseif (pocEnv::$request['delete']) {
+          if ($theAttribute->delete()) {
+            $closeWindow = TRUE;
+          } else {
+            $debit = pocEnv::$request['debit'];
+            $voucher = pocEnv::$request['voucher'];
+            $title = pocEnv::$request['title'];
+            $content = pocEnv::$request['content'];
+            $value = pocEnv::$request['value'];
+          }
+        } else {
+          $debit = $theAttribute->debit->path;
+          $voucher = $theAttribute->voucher->path;
+          $title = $theAttribute->title;
+          $content = $theAttribute->content;
+          $value = $theAttribute->value;
+        }
+      } else {
+        new pocError(400, 'No Attribute specified.');
+        $closeWindow = TRUE;
+      }
+    } else {
+      if ($className = pocEnv::$request['className']) {
+        if (pocEnv::$request['submitButton']) {
+          if ($theAttribute = $className::insert(pocEnv::$request['debit'], pocEnv::$request['poc'], pocEnv::$request['voucher'], pocEnv::$request['name'], pocEnv::$request['title'], pocEnv::$request['content'], pocEnv::$request['value'])) {
+            $closeWindow = TRUE;
+          } else {
+            $debit = pocEnv::$request['debit'];
+            $voucher = pocEnv::$request['voucher'];
+            $name = pocEnv::$request['name'];
+            $title = pocEnv::$request['title'];
+            $content = pocEnv::$request['content'];
+            $value = pocEnv::$request['value'];
+          }
+        }
+      } else {
+        new pocError(400, 'No Classname specified.');
+        $closeWindow = TRUE;
+      }
+    }
+  } else {
+    $thePoc = poc::open();
+    $closeWindow = TRUE;
+  }
+} else {
+  $thePoc = poc::open();
+  new pocError(400, 'No Poc specified.');
+  $closeWindow = TRUE;
+}
+
+header("Content-Type: text/html; charset=utf-8");
+
+?><!DOCTYPE html>
+<html>
+<head>
+  <base href="<?PHP $u = new pocPath(''); echo $u->url; ?>" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title><?PHP pocEcho::echoHtmlChars($poc->getTitle() . ': ' . $thePoc->getTitle()); ?></title>
+  <style type="text/css">
+  <!--
+
+body { font: 100.01%/120.01% Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: #eee; margin: 0px auto; padding: 16px; width: 600px; }
+
+div, ul, ol, li, textarea, label, table, td, tr, form, p, h1 { margin: 0px; padding: 0px; border: 0px; }
+
+p, h1 { margin-bottom: 16px; font-size: 100%; }
+h1 { text-align: center; }
+
+.labello  { display: inline-block; width: 120px; }
+
+.tar { text-align: right; }
+  -->
+  </style>
+  <script src="ckeditor/ckeditor.js"></script>
+  <script type="text/javascript">
+
+window.onunload = function() {
+  var callMe = window.callMeOnClose;
+  if (callMe)
+    callMe.theRefreshCall();
+}
+
+window.onload = function() {
+
+<?PHP
+
+foreach (pocError::fetchAll() as $error)
+  echo "window.alert('$error');\n";
+if ($closeWindow)
+  echo "window.close();\n";
+
+?>
+
+};
+
+  </script>
+</head>
+<body>
+<form action="<?PHP $u = new pocPath('.'); echo $u->url; ?>" method="POST">
+<input type="hidden" name="poc" value="<?PHP pocEcho::echoHtmlChars($thePoc->path); ?>" />
+<?PHP
+
+if ($theAttribute) {
+
+?>
+<input type="hidden" name="identifier" value="<?PHP echo $theAttribute->identifier; ?>" />
+<h1><?PHP echo $theAttribute->className; ?></h1>
+<p>
+  <span class="labello">Name:</span><?PHP echo $theAttribute->name; ?>
+</p>
+<p>
+  <span class="labello">Inhalt:</span>
+  <?PHP $i = $theAttribute->createInput(); $i['name'] = 'content'; echo $i; ?>
+</p>
+<hr />
+<p>
+  <span class="labello">Titel:</span>
+  <input type="text" name="title" value="<?PHP pocEcho::echoHtmlChars($title); ?>" />
+</p>
+<p>
+  <span class="labello">Soll:</span>
+  <input type="text" name="debit" value="<?PHP pocEcho::echoHtmlChars($debit); ?>" />
+</p>
+<p>
+  <span class="labello">Beleg:</span>
+  <input type="text" name="voucher" value="<?PHP pocEcho::echoHtmlChars($voucher); ?>" />
+</p>
+<p>
+  <span class="labello">Wert:</span>
+  <input type="text" name="value" value="<?PHP pocEcho::echoHtmlChars($value); ?>" />
+</p>
+<?PHP
+
+} else {
+  $className = pocEnv::$request['className'] ? pocEnv::$request['className'] : 'pocAttributeInt';
+
+?>
+<input type="hidden" name="className" value="<?PHP pocEcho::echoHtmlChars($className); ?>" />
+<h1>Neu: <?PHP echo $className; ?></h1>
+<p>
+  <span class="labello">Name:</span>
+  <input type="text" name="name" value="<?PHP pocEcho::echoHtmlChars($name); ?>" />
+</p>
+<p>
+  <span class="labello">Inhalt:</span>
+  <input type="text" name="content" value="<?PHP pocEcho::echoHtmlChars($content); ?>" />
+</p>
+<hr />
+<p>
+  <span class="labello">Titel:</span>
+  <input type="text" name="title" value="<?PHP pocEcho::echoHtmlChars($title); ?>" />
+</p>
+<p>
+  <span class="labello">Soll:</span>
+  <input type="text" name="debit" value="<?PHP pocEcho::echoHtmlChars($debit); ?>" />
+</p>
+<p>
+  <span class="labello">Beleg:</span>
+  <input type="text" name="voucher" value="<?PHP pocEcho::echoHtmlChars($voucher); ?>" />
+</p>
+<p>
+  <span class="labello">Wert:</span>
+  <input type="text" name="value" value="<?PHP pocEcho::echoHtmlChars($value); ?>" />
+</p>
+<?PHP
+
+}
+
+?>
+<p class="tar">
+  <input type="submit" name="submitButton" value="Speichern" />
+  <input type="submit" name="delete" value="Löschen" />
+  <input type="button" name="cancel" value="Abbrechen" onclick="window.close();" />
+</p>
+</form>
+</body>
+</html>
+<?PHP
+
+exit();
+
+?>

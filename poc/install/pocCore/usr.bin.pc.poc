@@ -1,0 +1,423 @@
+<?PHP
+
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/pc
+-- pocPrivileges: rosiud rosiud ros---
+-- pocTitle: PoC-Commander
+
+*******************************************************************************/
+
+$leftPoc = poc::open(isset($env->request['leftPoc'])? $env->request['leftPoc']: '~');
+$rightPoc = poc::open(isset($env->request['rightPoc'])? $env->request['rightPoc']: '~');
+
+if ($env->request['leftNew']) {
+  $newPoc = poc::open();
+  $newPoc->insert($leftPoc->path . '/' . $env->request['leftNew']);
+}
+
+if ($env->request['leftDelete'] && $env->request['leftSelection']) {
+  foreach ($env->request['leftSelection'] as $poc) {
+    $poc = poc::open($poc);
+    $poc->delete();
+  }
+}
+
+if ($env->request['leftCopy'] && $env->request['leftSelection']) {
+  foreach ($env->request['leftSelection'] as $poc) {
+    $poc = poc::open($poc);
+    $poc->copy($rightPoc->path);
+  }
+}
+
+if ($env->request['leftMove'] && $env->request['leftSelection']) {
+  foreach ($env->request['leftSelection'] as $poc) {
+    $poc = poc::open($poc);
+    $poc->move($rightPoc->path);
+  }
+}
+
+if ($env->request['rightNew']) {
+  $newPoc = poc::open();
+  $newPoc->insert($rightPoc->path . '/' . $env->request['rightNew']);
+}
+
+if ($env->request['rightDelete'] && $env->request['rightSelection']) {
+  foreach ($env->request['rightSelection'] as $poc) {
+    $poc = poc::open($poc);
+    $poc->delete();
+  }
+}
+
+if ($env->request['rightCopy'] && $env->request['rightSelection']) {
+  foreach ($env->request['rightSelection'] as $poc) {
+    $poc = poc::open($poc);
+    $poc->copy($leftPoc->path);
+  }
+}
+
+if ($env->request['rightMove'] && $env->request['rightSelection']) {
+  foreach ($env->request['rightSelection'] as $poc) {
+    $poc = poc::open($poc);
+    $poc->move($leftPoc->path);
+  }
+}
+
+header("Content-Type: text/html; charset=utf-8");
+
+$tag = new pocTag('');
+$u = new pocPath('');
+
+?><!DOCTYPE html>
+<html>
+<head>
+  <base href="<?PHP $u->path = ''; echo $u->url; ?>" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>pocCommander</title>
+  <style type="text/css">
+  <!--
+
+body { font: .8em/1.2em Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: silver;
+     width: 100%; height: 100%; margin: 0em auto; padding: 0em; }
+
+div, form, table, tr, td, th, p, pre, ul, ol { margin: 0em; padding: 0em; }
+h1, h2, h3, h4, h5, h6 { margin-top: 1em; margin-bottom: .5em; padding: 0em; }
+p, li { margin-top: 0em; margin-bottom: .5em; padding: 0em; }
+li { margin-left: 1em; }
+
+pre { font: .8em/1.2em "Lucida Console", "Lucida Sans Typewriter", Monaco, "Bitstream Vera Sans Mono", monospace; }
+
+#leftDiv, #rightDiv { position: absolute; width: 50%; top: 0em; bottom: 0em; }
+#leftDiv { left: 0em; }
+#rightDiv { right: 0em; }
+
+.headDiv { position: relative; padding: .5em 1em 0em 1em; line-height: 1.5em; font-weight: bold; }
+
+.footDiv { position: absolute; left: 0em; right: 0em; bottom: 0em; padding: 1em; text-align: center; }
+
+.listDiv { position: absolute; left: 1em; right: 1em; top: 15em; bottom: 3em; overflow: scroll; background: #fff; border: .1em solid gray; }
+.previewDiv { position: absolute; left: 1em; right: 1em; top: 4em; height: 9em; overflow: scroll; background: #fff; border: .1em solid gray; padding: .5em; }
+.previewDiv :first-child { margin-top: 0em; }
+
+.listTable { width: 100%; }
+.listTable th, td { padding: .1em; text-align: left; white-space: nowrap; overflow: hidden; border-right: .1em solid silver; border-bottom: .1em solid silver; }
+.listTable th { background: #ddd; }
+.listTable .overTr:hover { background: #ddf; }
+.listTable .here { font-weight: bold; }
+
+.monoText { font: .8em/1em "Lucida Console", "Lucida Sans Typewriter", Monaco, "Bitstream Vera Sans Mono", monospace; }
+.whiteSpan { background: white; width: 5em; padding: .1em; font-weight: normal; }
+
+.w120 { width: 10em; }
+
+.brClear { clear: both; }
+.fll { float: left; margin-right: .5em; }
+.flr { float: right; margin-left: .5em; }
+
+a:link { color: #00c; text-decoration:none; }
+a:visited { color: #00c; }
+a:focus { }
+a:hover { text-decoration:underline; }
+a:active { color:lime; }
+
+  -->
+  </style>
+  <script type="text/javascript">
+
+document.pocDoDelete = false;
+
+function leftInsert() {
+  var newName = prompt('New poc:', '');
+  if (newName) {
+    document.forms['allDiv'].elements['leftNew'].value = newName;
+    document.forms['allDiv'].submit();
+  }
+}
+
+function rightInsert() {
+  var newName = prompt('New poc:', '');
+  if (newName) {
+    document.forms['allDiv'].elements['rightNew'].value = newName;
+    document.forms['allDiv'].submit();
+  }
+}
+
+function checkForm() {
+  if (document.pocDoDelete) {
+    document.pocDoDelete = false;
+    return window.confirm('Really delete selected pocs and their children?');
+  }
+  return true;
+}
+
+window.onload = function() {
+<?PHP
+
+foreach (pocError::fetchAll() as $error)
+  echo "window.alert('$error');";
+
+?>
+};
+
+
+  </script>
+</head>
+<body>
+<form id="allDiv" action="<?PHP $u->path = '.'; echo $u->url; ?>" method="get" onsubmit="return checkForm();">
+  <input type="hidden" id="leftPoc" name="leftPoc" value="<?PHP $tag->echoWhat($leftPoc->path); ?>" />
+  <input type="hidden" id="rightPoc" name="rightPoc" value="<?PHP $tag->echoWhat($rightPoc->path); ?>" />
+  <input type="hidden" id="leftNew" name="leftNew" />
+  <input type="hidden" id="rightNew" name="rightNew" />
+  <div id="leftDiv">
+    <div class="headDiv">
+<?PHP
+
+$u = new pocPath ('.');
+$u['rightPoc'] = $rightPoc->path;
+$u['leftPoc'] = '';
+$a = new pocTagA('..', $u->url);
+$a->echoTag();
+$names = explode('/', $leftPoc->path);
+$slash = '';
+foreach ($names as $name) {
+  $u['leftPoc'] .= $slash . $name;
+  $a->what = $name;
+  $a['href'] = $u->url;
+  $slash = '/';
+  echo $slash;
+  $a->echoTag();
+  unset($a['class']);
+}
+echo "\n";
+
+$u = new pocPath ('usr/bin/edit');
+$u['poc'] = $leftPoc->path;
+$a = new pocTagA('edit', $u->url);
+$a['class'] = 'flr';
+$a['target'] = 'blank';
+$a->echoTag();
+
+echo ' ';
+
+$u = new pocPath ('usr/bin/chown');
+$u['poc'] = $leftPoc->path;
+$a = new pocTagA(chown, 'javascript:void;');
+$a['class'] = 'flr';
+$a['title'] = "$leftPoc->userName:$leftPoc->groupName";
+$a['onmouseup'] = "window.open('$u->url', 'PocChown', 'width=640,height=480,menubar=no,toolbar=no')";
+$a->echoTag();
+
+echo ' ';
+
+$u = new pocPath ('usr/bin/chmod');
+$u['poc'] = $leftPoc->path;
+$a = new pocTagA("chmod", 'javascript:void;');
+$a['class'] = 'flr';
+$a['title'] = rwx($leftPoc->userPrivs) . ' ' . rwx($leftPoc->groupPrivs) . ' ' . rwx($leftPoc->otherPrivs);
+$a['onmouseup'] = "window.open('$u->url', 'PocChmod', 'width=640,height=480,menubar=no,toolbar=no')";
+$a->echoTag();
+
+echo "<br class=\"brClear\" />\n";
+
+?>
+      Title: <span class="whiteSpan"><?PHP $a->echoWhat($leftPoc->title); ?></span>
+      Priv: <span class="whiteSpan monoText"><?PHP echo rwx($leftPoc->userPrivs) . ' '; echo rwx($leftPoc->groupPrivs) . ' '; echo rwx($leftPoc->otherPrivs) . ' '; echo ugo($leftPoc->navigate); ?></span>
+      Tmplt: <span class="whiteSpan"><?PHP $a->echoWhat($leftPoc->template); ?></span>
+      MIME: <span class="whiteSpan"><?PHP $a->echoWhat($leftPoc->mime); ?></span>
+      URL: <span class="whiteSpan"><?PHP $a->echoWhat($leftPoc->url); ?></span>
+    </div>
+    <div class="footDiv">
+      <input type="button" name="new" value="New" onclick="leftInsert();" /> ||
+      <input type="submit" name="leftDelete" value="Delete" onclick="document.pocDoDelete=true;" />
+      <input type="submit" name="leftCopy" value="Copy &gt;&gt;" />
+      <input type="submit" name="leftMove" value="Move &gt;&gt;" />
+    </div>
+    <div class="previewDiv"><?PHP preview($leftPoc->content); ?></div>
+    <div class="listDiv">
+      <table class="listTable" cellspacing="0">
+        <tr>
+          <th style="width:1em;"> </th>
+          <th style="width:5em;">Name:</th>
+          <th >Title:</th>
+          <th style="width:3em;">Priv:</th>
+          <th style="width:3em;">Tmplt:</th>
+          <th style="width:3em;">MIME:</th>
+          <th style="width:3em;">URL:</th>
+        </tr>
+<?PHP
+
+$a = new pocTagA();
+$u = new pocPath ('.');
+$u['rightPoc'] = $rightPoc->path;
+$rows = $leftPoc->select();
+foreach ($rows as $row) {
+  $u['leftPoc'] = $leftPoc->path? $leftPoc->path . '/' . $row['name']: $row['name'];
+  $a->what = $row['name'];
+  $a['href'] = $u->url;
+
+?>
+        <tr class="overTr">
+          <td><input type="checkbox" name="leftSelection[]" value="<?PHP $a->echoWhat($u['leftPoc']); ?>" /></td>
+          <td<?PHP if ($row['navigate'] & poc::OTHER_NAV) echo ' class="here"'; ?>><?PHP $a->echoTag(); ?></td>
+          <td<?PHP if ($row['navigate'] & poc::OTHER_NAV) echo ' class="here"'; ?>><?PHP $a->echoWhat($row['title']); ?></td>
+          <td class="monoText"><?PHP echo rwx($row['userPrivs']) . "\n"; echo rwx($row['groupPrivs']) . "\n"; echo rwx($row['otherPrivs']) . "\n"; echo ugo($row['navigate']); ?></td>
+          <td><?PHP $a->echoWhat($row['template']); ?></td>
+          <td><?PHP $a->echoWhat($row['mime']); ?></td>
+          <td><?PHP $a->echoWhat($row['url']); ?></td>
+        </tr>
+<?PHP
+
+}
+
+?>
+      </table>
+    </div>
+  </div>
+  <div id="rightDiv">
+    <div class="headDiv">
+<?PHP
+
+$u = new pocPath ('.');
+$u['leftPoc'] = $leftPoc->path;
+$u['rightPoc'] = '';
+$a = new pocTagA('..', $u->url);
+$a->echoTag();
+$names = explode('/', $rightPoc->path);
+$slash = '';
+foreach ($names as $name) {
+  $u['rightPoc'] .= $slash . $name;
+  $a->what = $name;
+  $a['href'] = $u->url;
+  $slash = '/';
+  echo $slash;
+  $a->echoTag();
+  unset($a['class']);
+}
+
+echo "\n";
+
+$u = new pocPath ('usr/bin/edit');
+$u['poc'] = $rightPoc->path;
+$a = new pocTagA('edit', $u->url);
+$a['class'] = 'flr';
+$a['target'] = 'blank';
+$a->echoTag();
+
+echo ' ';
+
+$u = new pocPath ('usr/bin/chown');
+$u['poc'] = $rightPoc->path;
+$a = new pocTagA(chown, 'javascript:void;');
+$a['class'] = 'flr';
+$a['title'] = "$leftPoc->userName:$leftPoc->groupName";
+$a['onmouseup'] = "window.open('$u->url', 'PocChown', 'width=640,height=480,menubar=no,toolbar=no')";
+$a->echoTag();
+
+echo ' ';
+
+$u = new pocPath ('usr/bin/chmod');
+$u['poc'] = $rightPoc->path;
+$a = new pocTagA("chmod", 'javascript:void;');
+$a['class'] = 'flr';
+$a['title'] = rwx($leftPoc->userPrivs) . ' ' . rwx($leftPoc->groupPrivs) . ' ' . rwx($leftPoc->otherPrivs);
+$a['onmouseup'] = "window.open('$u->url', 'PocChmod', 'width=640,height=480,menubar=no,toolbar=no')";
+$a->echoTag();
+
+echo "<br class=\"brClear\" />\n";
+?>
+      <p>
+        Title: <span class="whiteSpan"><?PHP $a->echoWhat($rightPoc->title); ?></span>
+        Priv: <span class="whiteSpan monoText"><?PHP echo rwx($rightPoc->userPrivs) . ' '; echo rwx($rightPoc->groupPrivs) . ' '; echo rwx($rightPoc->otherPrivs) . ' '; echo ugo($rightPoc->navigate); ?></span>
+        Tmplt: <span class="whiteSpan"><?PHP $a->echoWhat($rightPoc->template); ?></span>
+        MIME: <span class="whiteSpan"><?PHP $a->echoWhat($rightPoc->mime); ?></span>
+        URL: <span class="whiteSpan"><?PHP $a->echoWhat($rightPoc->url); ?></span>
+      </p>
+    </div>
+    <div class="footDiv">
+      <input type="button" name="new" value="New" onclick="rightInsert();" /> ||
+      <input type="submit" name="rightDelete" value="Delete" onclick="document.pocDoDelete=true;" />
+      <input type="submit" name="rightCopy" value="&lt;&lt; Copy" />
+      <input type="submit" name="rightMove" value="&lt;&lt; Move" />
+    </div>
+    <div class="previewDiv"><?PHP preview($rightPoc->content); ?></div>
+    <div class="listDiv">
+      <table class="listTable" cellspacing="0">
+        <tr>
+          <th style="width:1em;"> </th>
+          <th style="width:5em;">Name:</th>
+          <th >Title:</th>
+          <th style="width:3em;">Priv:</th>
+          <th style="width:3em;">Tmplt:</th>
+          <th style="width:3em;">MIME:</th>
+          <th style="width:3em;">URL:</th>
+        </tr>
+<?PHP
+
+$a = new pocTagA();
+$u = new pocPath ('.');
+$u['leftPoc'] = $leftPoc->path;
+$rows = $rightPoc->select();
+foreach ($rows as $row) {
+  $u['rightPoc'] = $rightPoc->path? $rightPoc->path . '/' . $row['name']: $row['name'];
+  $a->what = $row['name'];
+  $a['href'] = $u->url;
+
+?>
+        <tr class="overTr">
+          <td><input type="checkbox" name="rightSelection[]" value="<?PHP $a->echoWhat($u['rightPoc']); ?>" /></td>
+          <td<?PHP if ($row['navigate'] & poc::OTHER_NAV) echo ' class="here"'; ?>><?PHP $a->echoTag(); ?></td>
+          <td<?PHP if ($row['navigate'] & poc::OTHER_NAV) echo ' class="here"'; ?>><?PHP $a->echoWhat($row['title']); ?></td>
+          <td class="monoText"><?PHP echo rwx($row['userPrivs']) . "\n"; echo rwx($row['groupPrivs']) . "\n"; echo rwx($row['otherPrivs']) . "\n"; echo ugo($row['navigate']); ?></td>
+          <td><?PHP $a->echoWhat($row['template']); ?></td>
+          <td><?PHP $a->echoWhat($row['mime']); ?></td>
+          <td><?PHP $a->echoWhat($row['url']); ?></td>
+        </tr>
+<?PHP
+
+}
+
+?>
+      </table>
+    </div>
+  </div>
+</form>
+</body>
+</html>
+<?PHP
+
+$env->quit();
+
+/******************************************************************************/
+
+function preview($str) {
+  if (preg_match('/<\?/', $str) || !preg_match('/<\/\w+>/', $str))
+    $str = '<pre>' . htmlentities($str, ENT_COMPAT | ENT_HTML401, 'UTF-8') . '</pre>';
+  echo $str;
+}
+
+function rwx($priv) {
+  $str = $priv & poc::RUN_PRIV? 'r': '-';
+  $str .= $priv & poc::OPEN_PRIV? 'o': '-';
+  $str .= $priv & poc::SELECT_PRIV? 's': '-';
+  $str .= $priv & poc::INSERT_PRIV? 'i': '-';
+  $str .= $priv & poc::UPDATE_PRIV? 'u': '-';
+  $str .= $priv & poc::DELETE_PRIV? 'd': '-';
+  return $str;
+}
+
+function ugo($navi) {
+  $str = $navi & poc::USER_NAV? 'u': '-';
+  $str .= $navi & poc::GROUP_NAV? 'g': '-';
+  $str .= $navi & poc::OTHER_NAV? 'o': '-';
+  return $str;
+}
+
+?>

@@ -1,0 +1,22 @@
+<!--
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: www/home
+-- pocPrivileges: rosiud rosiud ros---
+-- pocUser: user
+-- pocGroup: user
+-- pocTitle: Home
+-- pocAttributeInt: usr/lib/template, _template, 1
+
+-->
+
+<h1>Home of PoC!</h1>
+<p>Hellau!</p>
+<pre><?PHP new pocLog('dump'); pocLog::dump(); ?></pre>

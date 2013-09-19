@@ -1,0 +1,241 @@
+<?PHP
+
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/filemanager/CKEditor
+-- pocUser: admin
+-- pocGroup: user
+-- pocPrivileges: rosiud ros--- ------
+-- pocTitle: PoC Datei Manager
+
+*******************************************************************************/
+
+define('POC_IMG_MAX_SIZE', 64);
+$icon = 'upload/Folder-icon.png';
+
+$path = pocEnv::$request['path'] ? pocEnv::$request['path'] : pocEnv::$env['pocUploadFolder'];
+
+################################################################################
+
+# file upload
+
+if ($_FILES['file']['name'] && pocEnv::$request['submit']) {
+  if (!move_uploaded_file($_FILES['file']['tmp_name'], "$path/" . $_FILES['file']['name']))
+    new pocError(400, 'Datei-Upload fehlgeschlagen: ' . $_FILES['file']['error']);
+  pocEnv::$request['submit'] = '';
+}
+
+if (is_array(pocEnv::$request['selection']) && pocEnv::$request['delete']) {
+  foreach (pocEnv::$request['selection'] as $v) {
+    if ($v) {
+      if (is_dir($v)) {
+        if (!@rmdir($v))
+          new pocError(400, 'Ordner löschen fehlgeschlagen: ' . $v);
+      } else {
+        if (!@unlink($v))
+          new pocError(400, 'Datei löschen fehlgeschlagen: ' . $v);
+      }
+    }
+  }
+}
+
+if (pocEnv::$request['new']) {
+  if (!mkdir("$path/" . pocEnv::$request['new']))
+    new pocError(400, 'Ordner anlegen fehlgeschlagen: ' . "$path/" . pocEnv::$request['new']);
+}
+
+################################################################################
+
+$u = new pocPath('');
+
+header("Content-Type: text/html; charset=utf-8");
+
+?><!DOCTYPE html>
+<html>
+<head>
+  <base href="<?PHP $u->path = ''; echo $u->url; ?>" />
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title><?PHP pocEcho::echoHtmlChars("$path - " . $poc->getTitle()); ?></title>
+  <style type="text/css">
+  <!--
+
+html, body, form { font: 1em/1.2em Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: #eee;
+     margin: 0em auto; padding: 0em; }
+
+img, div { margin: 0em; padding: 0em; border: 0em; }
+input { margin: 0em; padding: 0em; vertical-align: middle; }
+
+#topDiv { position: fixed; top: 0em; right: 0em; left: 0em; height: 2em; padding: 0.5em; text-align: center; background: #eee; }
+#bottomDiv { position: fixed; bottom: 0em; right: 0em; left: 0em; height: 2em; padding: 1em;
+    text-align: center; vertical-align: middle; display: table-cell; background: #eee; }
+
+#browseDiv { margin: 3em 1em 3em 1em; padding: .5em; min-height: 8em; background-color: #fff; }
+#browseDiv br { clear: both; }
+#browseDiv p { margin: 0em; padding: 0em; }
+#browseDiv .itemFrame { float: left; width: 5em; height: 8em; margin: 0.5em; padding: 0.5em;
+    text-align: center; font-size: 80%; line-height: 100%; overflow: hidden; }
+#browseDiv .itemFrame:hover { cursor: pointer; }
+#browseDiv .imgFrame { width: 5em; height: 5em; margin-bottom: 1.5em; text-align: center; vertical-align: middle; display: table-cell; }
+
+.selectedItem { background-color: #90f; }
+
+.flr { float: right; margin-left: .5em; }
+.fll { float: left; margin-right: .5em; }
+
+.pathUp { min-width: 20em; }
+
+  -->
+  </style>
+  <script type="text/javascript">
+
+window.onload = function() {
+<?PHP
+
+$u->path = '.';
+$u['CKEditorFuncNum'] = pocEnv::$request['CKEditorFuncNum'];
+$u['path'] = $path;
+
+foreach (pocError::fetchAll() as $error)
+  echo "window.alert('$error');";
+
+if ($img = pocEnv::$request['img']) {
+  $num = pocEnv::$request['CKEditorFuncNum'];
+  echo "window.opener.CKEDITOR.tools.callFunction($num, '$img');\n";
+  echo "window.close();\n";
+}
+
+if (pocEnv::$request['cancel']) {
+  echo "window.close();\n";
+}
+
+?>
+  document.theForm.path.options[document.theForm.path.length - 1].selected = true;
+};
+
+function toggleSelection(obj, id, file) {
+  with (document.theForm[ 'selection[' + id + ']' ]) {
+    if (value == '') {
+      value = file;
+      obj.style.backgroundColor = '#c9f';
+    } else {
+      value = '';
+      obj.style.backgroundColor = '#fff';
+    }
+  }
+}
+
+function newFolder() {
+  var name;
+  if (name = window.prompt('Neuer Ordner:', '')) {
+    window.location.href='<?PHP echo "$u->url&new="; unset($u['path']); ?>&new=' + name;
+  }
+}
+
+  </script>
+</head>
+<body>
+<form enctype="multipart/form-data" name="theForm" action="<?PHP echo $u->url; ?>" method="post">
+  <div id="topDiv">
+    <select class="pathUp" name="path" onchange="window.location.href='<?PHP echo "$u->url&path="; ?>' + this.value;">
+<?PHP
+
+$pp = '';
+$slash = '';
+foreach (explode('/', $path) as $p) {
+  $pp .= $slash . $p;
+?>
+      <option value="<?PHP echo $pp; ?>"><?PHP echo $p; ?></option>
+<?PHP
+  $slash = '/';
+}
+
+?>
+    </select>
+  </div>
+  <div id="browseDiv">
+<?PHP
+
+$ds = array();
+$fs = array();
+if ($d = @dir($path)) {
+  while (false !== ($entry = $d->read())) {
+    if ($entry == '.' || $entry == '..')
+      continue;
+    $f = $path ? "$path/$entry" : $entry;
+    if (is_dir($f))
+      $ds[$entry] = $f;
+    else
+      $fs[$entry] = $f;
+  }
+  ksort($ds);
+  ksort($fs);
+} else {
+  echo "Directory '$path' not found.";
+}
+
+$i = 0;
+foreach ($ds as $k => $v) {
+  $u['path'] = $v;
+?>
+    <div class="itemFrame" title="<?PHP echo $k; ?>" onmouseup="toggleSelection(this, <?PHP echo $i; ?>, '<?PHP echo $v; ?>');" ondblclick="window.location.href='<?PHP echo $u->url; ?>';">
+      <input type="hidden" name="selection[<?PHP echo $i; ?>]" value="" />
+      <div class="imgFrame"><img alt="" src="<?PHP echo $icon; ?>" width="32" height="32" /></div>
+      <p><?PHP echo $k; ?></p>
+    </div>
+<?PHP
+  $i++;
+}
+
+$u['path'] = $path;
+foreach ($fs as $k => $v) {
+  if ($size = @getimagesize($v)) {
+    $u['img'] = $v;
+    $w = $size[0];
+    $h = $size[1];
+    if ($w > POC_IMG_MAX_SIZE) {
+      $h = $h * POC_IMG_MAX_SIZE / $w;
+      $w = POC_IMG_MAX_SIZE;
+      if ($h > POC_IMG_MAX_SIZE) {
+        $w = $w * POC_IMG_MAX_SIZE / $h;
+        $h = POC_IMG_MAX_SIZE;
+      }
+    }
+?>
+    <div class="itemFrame" title="<?PHP echo $k; ?>" onmouseup="toggleSelection(this, <?PHP echo $i; ?>, '<?PHP echo $v; ?>');" ondblclick="window.location.href='<?PHP echo $u->url; ?>';">
+      <input type="hidden" name="selection[<?PHP echo $i; ?>]" value="" />
+      <div class="imgFrame">
+        <img src="<?PHP echo $v; ?>" width="<?PHP echo floor($w); ?>" height="<?PHP echo floor($h); ?>" alt="<?PHP echo $k; ?>" />
+      </div>
+      <p><?PHP echo preg_replace('/(\.\w+)$/', '<br /> $1', $k); ?></p>
+    </div>
+<?PHP
+    $i++;
+  }
+}
+
+?>
+    <br />
+  </div>
+  <div id="bottomDiv">
+    <input class="fll" type="file" name="file" accept="image/*" />
+    <input type="button" name="new" value="Neuer Ordner" onmouseup="newFolder();" />
+    <input type="submit" name="delete" value="Löschen" />
+    <input class="flr" type="submit" name="submit" value="OK" />
+    <input class="flr" type="submit" name="cancel" value="Abbrechen" />
+  </div>
+</form>
+</body>
+</html>
+<?PHP
+
+exit();
+
+?>
