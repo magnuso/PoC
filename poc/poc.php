@@ -36,6 +36,9 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   const MAGIC_DROP_QUEUE = "_listener";
   const VARCHAR_LIMIT = 191;
 
+  const SELECT_DEFAULT_CLASS = "";
+  const SELECT_DEFAULT_MODE = 1; # NAVI_MODE
+
   private static $cacheByPath = array();
 
   protected static $countSelect = 0;
@@ -212,38 +215,45 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
     return !pocError::hasError();
   }
 
-  # select($resultMode, $pocMode, $nameLike, $contentLike);
+  # select($resultClass, $pocMode, $nameLike, $contentLike);
   # also creates a temporary table of results for subsequent finds.
-  # ATTENTION! the temporary table can't be nested. subsequent finds work on amy poc.
+  # ATTENTION! the temporary table can't be nested. subsequent finds work on any poc.
   #
   public function select() {
-    pocError::fetch("poc->select($this->id)");
+    pocError::fetch("poc->selectTree($this->path)");
     $args = func_get_args();
-    $resultMode = count($args) ? array_shift($args) : 0;
-    $pocMode = count($args) ? array_shift($args) : self::NAVI_MODE;
+    $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
+    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
     $nameLike = count($args) ? array_shift($args) : '%';
     $contentLike = count($args) ? array_shift($args) : '%';
-    return pocEnv::call("pocPocSelect", array($this->id, $resultMode, $pocMode, $nameLike, $contentLike));
+    return pocEnv::call("pocPocSelect", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
   }
 
-  # select($selectMode, $nameLike, $contentLike, $pocMode);
-  # also creates a temporary table of results for subsequent finds.
-  #
   public function selectTree() {
-    pocError::fetch("poc->selectTree($this->id)");
+    pocError::fetch("poc->selectTree($this->path)");
     $args = func_get_args();
-    $resultMode = count($args) ? array_shift($args) : 0;
-    $pocMode = count($args) ? array_shift($args) : self::NAVI_MODE;
+    $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
+    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
     $nameLike = count($args) ? array_shift($args) : '%';
     $contentLike = count($args) ? array_shift($args) : '%';
-    return pocEnv::call("pocPocSelectTree", array($this->id, $resultMode, $pocMode, $nameLike, $contentLike));
+    return pocEnv::call("pocPocSelectTree", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
   }
 
-  # find($selectMode, $findAttribute, $NextFindAttribute, ...);
+  public function selectStem() {
+    pocError::fetch("poc->selectTree($this->path)");
+    $args = func_get_args();
+    $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
+    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
+    $nameLike = count($args) ? array_shift($args) : '%';
+    $contentLike = count($args) ? array_shift($args) : '%';
+    return pocEnv::call("pocPocSelectStem", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
+  }
+
+  # find($resultClass, $findAttribute, $FindNextAttribute, ...);
   # finds in results of previous select.
   #
   public function find() {
-    pocError::fetch(__CLASS__ . "::" . __METHOD__ . "($this->id)");
+    pocError::fetch("poc->find($this->path)");
     $args = func_get_args();
     $resultMode = array_shift($args);
     $symbols = array();
