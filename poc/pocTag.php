@@ -15,7 +15,7 @@ class pocTag extends pocArray implements ArrayAccess {
 
   public $tag;
   public $params;
-  public $htmlChars;
+  public $isHtml;
 
   protected $intro;
   protected $outro;
@@ -39,7 +39,7 @@ class pocTag extends pocArray implements ArrayAccess {
       return $out . " />$tag[3]";
     $out .= ">";
     foreach($this as $content)
-      $out .= is_a($content, __CLASS__) ? $content->__toString() : ($this->htmlChars ? $content : pocEnv::htmlChars($content));
+      $out .= is_a($content, __CLASS__) ? $content->__toString() : ($this->isHtml ? $content : pocEnv::isHtml($content));
     return "$out$tag[3]</$tag[2]>";
   }
 
@@ -101,7 +101,7 @@ class pocTag extends pocArray implements ArrayAccess {
   }
 
   protected static function getCreateParams() {
-    return array("tag" => "div", "content" => NULL, "params" => array(), "htmlChars" => TRUE);
+    return array("tag" => "div", "content" => NULL, "params" => array(), "isHtml" => TRUE);
   }
 
 }

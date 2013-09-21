@@ -14,7 +14,6 @@ http://poc-online.net/license
 class pocPath implements ArrayAccess, IteratorAggregate {
 
   public static $finishUrlFunction = NULL; # !!! pocPath::$finishUrlFunction = function($url, $path, $params, $ancor, $target) { return $url; };
-  public static $urlBase = ""; # !!!
 
   private $myPath = "";
   private $myName = "";
@@ -54,14 +53,14 @@ class pocPath implements ArrayAccess, IteratorAggregate {
   public function __set($key, $value) {
     switch ($key) {
       case "path":
-        $this->myPath = self::pathCulator(self::trim($value));
+        $this->myPath = self::pathCulator($value);
         $parent = explode("/", $this->myPath);
         $this->myName = array_pop($parent);
         $this->myParent = implode("/", $parent);
         break;
       case "append":
         if ($value = self::trim($value))
-          $this->path = $this->myPath ? "$this->myPath/$value" : $value;
+          $this->path = self::pathCulator($this->myPath ? "$this->myPath/$value" : $value);
         break;
     }
   }
@@ -108,6 +107,7 @@ class pocPath implements ArrayAccess, IteratorAggregate {
 
   # path
   public static function pathCulator($path) {
+    $path = self::trim($path);
     if (!$path)
       return "";
     $path = explode("/", $path);
@@ -137,7 +137,7 @@ class pocPath implements ArrayAccess, IteratorAggregate {
 
   # url
   public static function urlCulator($path, $params = array(), $ancor = "", $target = "") {
-    $url = self::$urlBase . ($path ? "/$path" : "")
+    $url = pocEnv::$urlBase . ($path ? "/$path" : "")
       . (count($params) ? "?" . http_build_query($params) : "")
       . ($ancor ? "#$ancor" : "") . ($target ? "\" target=\"$target" : "");
     if (self::$finishUrlFunction)

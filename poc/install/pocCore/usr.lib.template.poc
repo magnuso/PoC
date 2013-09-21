@@ -19,18 +19,20 @@ http://poc-online.net/license
 
 $poc = array_shift($params);
 
-if ($error = pocError::fetch())
-  header('HTTP/1.0 ' . $error->code . ' ' . $error->msg);
+pocError::fetch();
 
-header("Content-Type: text/html; charset=utf-8");
+# if ($error = pocError::fetch())
+#  header('HTTP/1.0 ' . $error->code . ' ' . $error->msg);
+
+pocEnv::header();
 
 ################################################################################
 
 ?><!DOCTYPE html>
 <html>
 <head>
-  <base href="<?PHP $u = new pocPath(''); echo $u->url; ?>" />
-  <title><?PHP pocEcho::echoHtmlChars($poc->getTitle()); ?></title>
+  <base href="<?PHP echo pocEnv::$urlBase; ?>" />
+  <title><?PHP echo strip_tags($poc->getTitle); ?></title>
 </head>
 <body>
 <div>

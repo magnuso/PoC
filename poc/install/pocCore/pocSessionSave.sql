@@ -17,15 +17,12 @@ CREATE PROCEDURE pocSessionSave (
 BEGIN
   DECLARE n, idUser BIGINT DEFAULT 0;
   bodyOfProc: BEGIN
-    DROP TEMPORARY TABLE IF EXISTS pocTempSelect;
-    DROP TEMPORARY TABLE IF EXISTS pocTempPath;
-    DROP TEMPORARY TABLE IF EXISTS pocTempIds;
     SELECT COUNT(ts.id), tu.id
       FROM pocSession AS ts
       LEFT JOIN pocUser AS tu ON tu.id = ts.userId
       WHERE ts.id = @pocSessionId
       INTO n, idUser;
-    IF n THEN
+    IF n > 0 THEN
       UPDATE pocSession SET content = sessionData WHERE id = @pocSessionId;
       IF idUser THEN
         UPDATE pocUser SET content = userData WHERE id = idUser;

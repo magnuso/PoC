@@ -57,14 +57,14 @@ if ($thePoc = poc::open(pocEnv::$request['poc'])) {
 
 pocEnv::$request['poc'] = $thePoc->path;
 
-header("Content-Type: text/html; charset=utf-8");
+pocEnv::header();
 
 ?><!DOCTYPE html>
 <html>
 <head>
-  <base href="<?PHP $u = new pocPath(''); echo $u->url; ?>" />
+  <base href="<?PHP echo pocPath::$urlBase; ?>" />
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title><?PHP pocEnv::echoHtmlChars($poc->getTitle . ': ' . $thePoc->getTitle); ?></title>
+  <title><?PHP pocEnv::echoHtml("$poc->getTitle: $thePoc->getTitle"; ?></title>
   <style type="text/css">
   <!--
 
@@ -72,29 +72,32 @@ header("Content-Type: text/html; charset=utf-8");
 
   -->
   </style>
-  <script src="ckeditor/ckeditor.js"></script>
+  <script src="js/jquery-1.10.2.min.js"></script>
+  <script src="js/ckeditor/ckeditor.js"></script>
+  <script type="text/javascript">
 
 <?PHP $p = poc::open('./js'); $p->run(); ?>
 
+  </script>
 </head>
 <body>
 <form action="<?PHP $u = new pocPath('.'); echo $u->url; ?>" method="POST">
-<input type="hidden" name="poc" value="<?PHP pocEnv::echoHtmlChars($thePoc->path); ?>" />
+<input type="hidden" name="poc" value="<?PHP echo $thePoc->path; ?>" />
 <div id="allDiv">
   <div id="topBar">
     <span class="flr"><a href="#" onclick="return launchImg();">Bilder</a> &bull; <a href="<?PHP $u = new pocPath('~', array('logout' => 'ok')); echo $u->url; ?>">logout</a></span>
     <ul id="topUl" class="noUl littleInput">
       <li>
         <label for="">&nbsp;</label>
-        <strong><?PHP pocEnv::echoHtmlChars($poc->getTitle); ?></strong>
+        <strong><?PHP pocEnv::echoHtml($poc->getTitle); ?></strong>
       </li>
       <li>
         <label for="name">Name:</label>
-        <input type="text" name="name" value="<?PHP pocEnv::echoHtmlChars($thePoc->name); ?>" />
+        <input type="text" name="<?PHP echo "$thePoc->identifier:"; ?>name" value="<?PHP pocEnv::echoHtml($thePoc->name); ?>" />
       </li>
       <li>
         <label for="title">Title:</label>
-        <input type="text" name="title" value="<?PHP pocEnv::echoHtmlChars($thePoc->title); ?>" />
+        <input type="text" name="<?PHP echo "$thePoc->identifier:"; ?>title" value="<?PHP pocEnv::echoHtml($thePoc->title); ?>" />
       </li>
       <li>
         <label for="mode">Navi:</label>
@@ -107,24 +110,18 @@ header("Content-Type: text/html; charset=utf-8");
 $u = new pocPath('.', array("poc" => ""));
 $a = pocTag::create("a", '..', array("href" => $u->url));
 $a->run();
-echo '/';
-$slash = '';
-if ($thePoc->path) {
-  foreach (explode('/', $thePoc->path) as $v) {
-    $a->content = $v;
-    $u['poc'] .= "$slash$v";
-    $a['href'] = $u->url;
-    $a->run();
-    echo '/ ';
-    $slash = '/';
-  }
+$path = new pocPath($thePoc->path);
+foreach ($path as $p) {
+  echo '/';
+  $u['poc'] = $p->path;
+  $a->run();
 }
 
 ?></strong>
 <?PHP
 
 $u = new pocPath('.', array("poc" => $thePoc->path));
-$select = pocTag::create(PHP_EOL . "        select", pocTag::create(PHP_EOL . "          option", "..."), array("onchange" => "window.location.href='$u->url'+'%2F'+this.value;"));
+$select = pocTag::create(PHP_EOL . "        select" . PHP_EOL . "        ", pocTag::create(PHP_EOL . "          option", "/..."), array("onchange" => "window.location.href='$u->url'+'%2F'+this.value;"));
 $rows = $thePoc->select(0, 0);
 foreach ($rows as $row)
   $select->push(pocTag::create(PHP_EOL . "          option", $row->name));
@@ -182,12 +179,12 @@ foreach ($thePoc->select(0, 0) as $p) {
   $t = pocTag::create("a", $p->title, array("href" => $u->url));
 ?>
         <tr>
-          <td><span class="selectHolder"><input type="checkbox" name="selection[]" value="<?PHP pocEnv::echoHtmlChars($thePoc->path . '/' . $p->name); ?>" /></span><span class="nameHolder"><?PHP $n->run(); ?></span><?PHP $t->run(); ?></td>
+          <td><span class="selectHolder"><input type="checkbox" name="selection[]" value="<?PHP pocEnv::echoHtml($thePoc->path . '/' . $p->name); ?>" /></span><span class="nameHolder"><?PHP $n->run(); ?></span><?PHP $t->run(); ?></td>
           <td><?PHP echo "$p->userName:$p->groupName"; ?></td>
           <td><?PHP echo rwx($p->userPrivs) .'&nbsp;'. rwx($p->groupPrivs) .'&nbsp;'. rwx($p->otherPrivs); ?></td>
           <td><?PHP echo xyMode($p->mode); ?></td>
           <td><?PHP echo str_replace(' ', '&nbsp;', date(pocEnv::$env['pocDateTimeFormat'], $p->modified)); ?></td>
-          <td><?PHP pocEnv::echoHtmlChars($p->modifiedByName); ?></td>
+          <td><?PHP pocEnv::echoHtml($p->modifiedByName); ?></td>
           <td class="tar"><?PHP echo $p->children; ?></td>
         <tr>
 <?PHP
@@ -216,7 +213,7 @@ foreach ($thePoc->select(0, 0) as $p) {
         <li><a href="#" onclick="return showTab('attributesDiv');">Attribute</a></li>
       </ul>
     </div>
-    <textarea id="content" name="content" wrap="off" style="border:0px;"><?PHP pocEnv::echoHtmlChars($thePoc->content); ?></textarea>
+    <textarea id="content" name="content" wrap="off" style="border:0px;"><?PHP pocEnv::echoHtml($thePoc->content); ?></textarea>
     <div class="bottomBar">&nbsp;</div>
   </div>
 <!--
@@ -258,8 +255,6 @@ foreach ($thePoc->select(0, 0) as $p) {
 </html>
 <?PHP
 
-exit();
-
 function rwx($priv) {
   $str = $priv & poc::RUN_PRIV? 'r': '-';
   $str .= $priv & poc::OPEN_PRIV? 'o': '-';
@@ -274,5 +269,7 @@ function xyMode($mode) {
   $str = $mode & poc::NAVI_MODE? 'n': '-';
   return $str;
 }
+
+pocEnv::quit();
 
 ?>

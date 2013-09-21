@@ -97,6 +97,9 @@ class pocRecord extends pocRow {
 
   protected function select() { return array(); }
 
+  #
+  protected function attributeAttach($attribute) { }
+
   # public static
   public static function open($identifier = 0, $fresh = FALSE) {
     list($class, $id) = explode(":", $identifier);
@@ -108,7 +111,7 @@ class pocRecord extends pocRow {
       else
         return $row;
     }
-    if ($proc = self::getOpenProc()) {
+    if ($proc = $class::getOpenProc()) {
       pocError::fetch("$class::open($identifier)");
       pocEnv::call($proc, array($id));
       return self::$cache[$identifier];
@@ -127,6 +130,12 @@ class pocRecord extends pocRow {
   # create params
   protected static function getCreateParams() {
     return array("name" => "", "title" => "", "content" => "");
+  }
+
+  # create params
+  public static function dump() {
+    foreach (self::$cache as $k => $v)
+      pocEnv::echoHtml("[$k] => $v" . PHP_EOL);
   }
 
 }

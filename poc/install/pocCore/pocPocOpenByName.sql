@@ -33,7 +33,6 @@ BEGIN
       LEAVE bodyOfProc;
     END IF;
     INSERT INTO pocTempSelect (id, sel, hit, path) SELECT inId, 1, 1, path;
-SELECT 'pocLog' AS className, 'pocPocOpenByName pocTempSelect' AS name, CONCAT(id, ' ', path) AS content FROM pocTempSelect;
     CALL pocPocCreatePocs();
     DELETE FROM pocTempSelect;
   END bodyOfProc;

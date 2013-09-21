@@ -16,8 +16,8 @@ class pocLog extends pocRow {
   private static $entries = array();
   private static $startTime = -1.0;
 
-  private $time;
-  private $level;
+  protected $time;
+  protected $level;
 
   public function __construct($row = array()) {
     $this->returnRow = FALSE;
@@ -27,7 +27,8 @@ class pocLog extends pocRow {
   }
 
   public function __toString() {
-    return sprintf("%s%.4f %-18s %s", str_repeat("  ", $this->level), $this->time, $this->name, $this->content);
+#    return sprintf("%3d %.3f %-18s %s", $this->level, $this->time, $this->name, $this->content);
+    return sprintf("%s%.3f %-18s %s", str_repeat("  ", $this->level), $this->time, $this->name, $this->content);
   }
 
   public static function time() {
@@ -45,7 +46,7 @@ class pocLog extends pocRow {
   public static function dump() {
     foreach(self::$entries as $log)
       echo $log->__toString() . PHP_EOL;
-    printf("now: %.4f%s", selftime, PHP_EOL);
+    printf("now: %.3f%s", self::time(), PHP_EOL);
   }
 
   protected static function getCreateParams() {
@@ -59,41 +60,35 @@ class pocLog extends pocRow {
 class pocWatch extends pocRow {
 
   private static $level = 0;
-  private static $currentWatch = NULL;
 
   private $time;
-  private $firstTime;
+  private $lastTime;
   private $firstLog;
-  private $saveWatch = NULL;
 
   public function __construct($row = array()) {
     parent::__construct($row);
     $log = pocLog::create($this->name, $this->content, self::$level++);
-    $this->firstTime = $this->time = $log->time;
+    $this->time = $log->time;
+    $this->lastTime = $log->time;
     $this->firstLog = $log;
-    if (self::$currentWatch)
-      self::$currentWatch->firstLog = NULL;
-    $this->saveWatch = self::$currentWatch;
-    self::$currentWatch = $this;
   }
 
   public function __destruct() {
     self::$level--;
     if ($this->firstLog) {
-      $this->firstLog->content .= sprintf(": %.4f", pocLog::time() - $this->time);
+      $this->firstLog->content .= sprintf(":: %.3f", pocLog::time() - $this->time);
       $this->firstLog = NULL;
     } else {
       $log = pocLog::create("$this->name kill", "", self::$level);
-      $log->content = sprintf("%s: %.4f total: %.4f", $this->content, $log->time - $this->time, $log->time - $this->firstTime);
+      $log->content = sprintf("%.3f total: %.3f", $log->time - $this->lastTime, $log->time - $this->time);
     }
-    self::$currentWatch = $this->saveWatch;
   }
 
   public function time($stop) {
     $log = pocLog::create("$this->name stop", "", self::$level - 1);
-    $time = $log->time - $this->time;
-    $log->content = sprintf("%s %.4f", "$this->msg $stop", $time);
-    $this->time = $log->time;
+    $time = $log->time - $this->lastTime;
+    $log->content = sprintf("%.3f %s", $time, "$this->msg $stop");
+    $this->lastTime = $log->time;
     $this->firstLog = NULL;
     return $time;
   }
@@ -112,7 +107,7 @@ class pocError extends pocRow {
   private static $trace = array();
   private static $last = NULL;
 
-  private $previous = NULL;
+  protected $previous = NULL;
 
   public function __construct($row = array()) {
     $this->returnRow = FALSE;

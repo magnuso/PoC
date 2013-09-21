@@ -77,9 +77,10 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   # magic
   public function __call($name, $params) {
-    if ($method = $this->drop($name, self::MAGIC_DROP_QUEUE))
-      if ($method = $method->debit)
-        return $method->run($this, $params);
+    if ($method = $this->drop($name, self::MAGIC_DROP_QUEUE) && $method = $method->debit)
+      return $method->run($this, $params);
+    else
+      pocError::create(404, "Not Found", "Magic Call: $this->path" . "->$name(..)");
   }
 
   # arrayaccess to attributes

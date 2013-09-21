@@ -57,42 +57,28 @@ class pocRun {
 
     if(!pocEnv::$env["PATH_INFO"])
       pocEnv::$env["PATH_INFO"] = pocEnv::$env["pocHome"];
-  
+
+    # run
     if ($poc = poc::open(".")) {
       self::runWithTemplate($poc);
-      $watch->time("run($poc->path)");
+      if (!pocError::hasError())
+        pocEnv::quit();
+      $watch->time("main run($poc->path) has error.");
     }
 
-    $watch->time("Fehler");
+    # run error poc
+    if ($poc = poc::open(pocEnv::$env["pocErrorPage"])) {
+      self::runWithTemplate($poc);
+      if (!pocError::hasError())
+        pocEnv::quit();
+    }
 
     # something's wrong
-    $errorPage = pocEnv::$env["pocErrorPage"] ? pocEnv::$env["pocErrorPage"] : pocEnv::$env["pocHome"];
-    if ($poc = poc::open($errorPage)) {
-      $watch->time("open error page");
-      if ($template = $poc->climb(self::TEMPLATE_ATTRIBUTE_NAME)) {
-        if ($template = $template->debit) {
-          $template->run($poc);
-          if (pocError::hasError())
-            pocLog::dump();
-          pocEnv::quit();
-        }
-        $watch->time("error template");
-      } else {
-        $poc->run();
-        $watch->time("error run");
-        if (pocError::hasError())
-          pocLog::dump();
-        pocEnv::quit();
-      }
-    }
+    $watch->time("still here?");
+    pocEnv::header("HTTP/1.0 500 Internal Server Error");
+    pocEnv::header();
 
-  # something's definitely wrong
-  $watch->time("still here?");
-  if (!headers_sent()) {
-    header("HTTP/1.0 500 Internal Server Error");
-    header(_POC_HTML_HEADER_);
-  }
-  ?><!DOCTYPE HTML>
+?><!DOCTYPE HTML>
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -109,29 +95,30 @@ class pocRun {
   <pre><?PHP pocEnv::dump(); ?></pre>
 </body>
 </html>
-    <?PHP
+<?PHP
+
     pocError::create("die", "still here!");
   }
 
   private static function runWithTemplate($poc) {
-    if (!$poc->runPriv) {
-      pocError::create(403, "Forbidden", $poc->path);
-      return;
-    }
-    if ($template = $poc->climb(self::TEMPLATE_ATTRIBUTE_NAME)) {
-      if ($template = $template->debit) {
-        if ($template->runPriv) {
+    try {
+      if ($template = $poc->climb(self::TEMPLATE_ATTRIBUTE_NAME)) {
+        if ($template = $template->debit) {
+          $watch = pocWatch::create("runWithTemplate");
           $template->run($poc);
-          pocEnv::quit();
+          $watch = NULL;
         } else {
-          pocError::create(403, "Forbidden");
+          pocError::create(404, "Not Found", "template on $template->path.");
         }
       } else {
-        pocError::create(404, "Not Found");
+        $watch = pocWatch::create("runWithoutTemplate");
+        $poc->run();
+        $watch = NULL;
+        if (!pocError::hasError())
+          pocEnv::quit();
       }
-    } else {
-      $poc->run();
-      pocEnv::quit();
+    } catch (Exception $e) {
+      pocLog::create("pocRun::main", $e->getMessage());
     }
   }
 

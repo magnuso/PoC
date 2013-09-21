@@ -21,13 +21,15 @@ class pocEnv extends pocRow {
   public static $session = array();
   public static $user = array();
 
+  public static $urlBase = ""; # !!!
+
   public function __construct($row = array()) {
-    $this->returnRow = FALSE;
     if (self::$dbh || self::$singleton) {
       pocError::create(403, "Forbidden", "pocEnv is singleton");
       return NULL;
     }
     self::$singleton = $this;
+    $this->returnRow = FALSE;
   }
 
   public function __destruct() {
@@ -41,10 +43,11 @@ class pocEnv extends pocRow {
       pocError::create(423, "Locked", "pocEnv set");
       return;
     }
-    pocError::fetch("pocEnv::create()");
-    $sessionId = array_shift(func_get_args());
     # singleton
     new self();
+    #
+    pocError::fetch("pocEnv::create()");
+    $sessionId = array_shift(func_get_args());
     # one more time UTF-8
     mb_internal_encoding(_POC_MB_ENCODING_);
     # fix $_REQUEST
@@ -53,7 +56,7 @@ class pocEnv extends pocRow {
     # fix PATH_INFO
     self::$env["PATH_INFO"] = pocPath::trim(self::$env["PATH_INFO"]);
     # set base url
-    pocPath::$urlBase = self::makeHttpBase();
+    self::$urlBase = self::makeHttpBase();
     # db
     $dbhClass = self::$session["pocPDOClass"];
     self::$dbh = new $dbhClass($dbhClass::dsn(self::$session["dbName"], self::$session["dbHost"], self::$session["dbPort"]),
@@ -124,20 +127,25 @@ class pocEnv extends pocRow {
   }
 
   # html output
-  public static function htmlChars($text) {
+  public static function html($text) {
     return htmlspecialchars($text);
   }
 
-  public static function htmlChars2br($text) {
+  public static function html2br($text) {
     return nl2br(htmlspecialchars($text));
   }
 
-  public static function echoHtmlChars($text) {
+  public static function echoHtml($text) {
     echo htmlspecialchars($text);
   }
 
-  public static function echoHtmlChars2br($text) {
+  public static function echoHtml2br($text) {
     echo nl2br(htmlspecialchars($text));
+  }
+
+  # http header
+  public static function header($header = _POC_HTML_HEADER_) {
+    header($header);
   }
 
   # http base
@@ -155,6 +163,13 @@ class pocEnv extends pocRow {
   public static function quit($status = 0) {
     self::$singleton = NULL;
     exit($status);
+  }
+
+  # debug
+  public static function pre_r($r) {
+    echo PHP_EOL . "<pre>";
+    self::echoHtml(print_r($r, TRUE));
+    echo "</pre>" . PHP_EOL;
   }
 
   # dump
