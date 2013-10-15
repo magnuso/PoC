@@ -23,6 +23,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
 
   public function __construct($row = array()) {
     $this->cacheMe = TRUE;
+    $this->returnRow = FALSE;
     parent::__construct($row);
     if ($poc = $this->credit)
       $poc->attributeAttach($this);

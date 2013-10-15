@@ -32,11 +32,13 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   const NO_MODE = 0;
   const NAVI_MODE = 1;
+  const SEARCH_MODE = 2;
+  const CACHE_MODE = 4;
 
   const MAGIC_DROP_QUEUE = "_listener";
   const VARCHAR_LIMIT = 191;
 
-  const SELECT_DEFAULT_CLASS = "";
+  const SELECT_DEFAULT_CLASS = __CLASS__;
   const SELECT_DEFAULT_MODE = 1; # NAVI_MODE
 
   private static $cacheByPath = array();
@@ -52,7 +54,7 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   protected $userPrivs = poc::OWNER_PRIVS;
   protected $groupPrivs = poc::OWNER_PRIVS;
   protected $otherPrivs = poc::OTHER_PRIVS;
-  protected $count = 0;
+  protected $children = 0;
 
   protected $attributes = array();
   protected $attributesCache = array();
@@ -161,11 +163,11 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
     $path = new pocPath($path);
     if (!$path->name) {
       pocError::create(400, "Bad Request", "poc->insert($path) has no name.");
-      return;
+      return NULL;
     }
     if (!$parent = poc::open($path->parent)) {
       pocError::create(404, "Not Found", "poc->insert($path) can't open parent.");
-      return;
+      return NULL;
     }
     $this->parentId = $parent->id;
     if ($newPoc = parent::insert($path->name))
@@ -216,7 +218,7 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
     return !pocError::hasError();
   }
 
-  # select($resultClass, $pocMode, $nameLike, $contentLike);
+  # select($resultClass, $pocMode, $nameLike, $contentLike, );
   # also creates a temporary table of results for subsequent finds.
   # ATTENTION! the temporary table can't be nested. subsequent finds work on any poc.
   #

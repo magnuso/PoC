@@ -54,7 +54,7 @@ class pocRow implements IPocRow {
   protected function this2params($paramsNames) {
     $result = array();
     foreach ($paramsNames as $key)
-      $result[$key] = $this->$key;
+      $result[] = $this->$key;
     return $result;
   }
 

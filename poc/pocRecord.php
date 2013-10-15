@@ -64,11 +64,12 @@ class pocRecord extends pocRow {
 
   # db
   public function insert($name) {
-    if ($proc = self::getInsertProc()) {
-      pocError::fetch(get_class($this) . "->insert($name)");
+    $class = get_class($this);
+    if ($proc = $class::getInsertProc()) {
+      pocError::fetch("$class->insert($name)");
       self::$lastInserted = NULL;
       $this->name = $name;
-      pocEnv::call($proc, $this->this2params(self::getInsertParams()));
+      pocEnv::call($proc, $this->this2params($class::getInsertParams()));
       return self::$lastInserted;
     }
   }
@@ -76,9 +77,10 @@ class pocRecord extends pocRow {
   public function update() {
     if (!$this->id)
       return;
-    if ($proc = self::getUpdateProc()) {
-      pocError::fetch(get_class($this) . "->update($this->id)");
-      pocEnv::call($proc, $this->this2params(self::getUpdateParams()));
+    $class = get_class($this);
+    if ($proc = $class::getUpdateProc()) {
+      pocError::fetch("$class->update($this->id)");
+      pocEnv::call($proc, $this->this2params($class::getUpdateParams()));
       return !pocError::hasError();
     }
   }
@@ -86,8 +88,9 @@ class pocRecord extends pocRow {
   public function delete() {
     if (!$this->id)
       return;
-    if ($proc = self::getDeleteProc()) {
-      pocError::fetch(get_class($this) . "->delete($this->id)");
+    $class = get_class($this);
+    if ($proc = $class::getDeleteProc()) {
+      pocError::fetch("$class->delete($this->id)");
       pocEnv::call($proc, array($this->id));
       if ($ok = !pocError::hasError())
         unset(self::$cache[$this->identifier]);

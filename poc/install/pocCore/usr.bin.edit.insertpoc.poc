@@ -56,14 +56,14 @@ if (pocEnv::$request['poc']) {
   $thePoc = poc::open();
 }
 
-header("Content-Type: text/html; charset=utf-8");
+pocEnv::header();
 
 ?><!DOCTYPE html>
 <html>
 <head>
-  <base href="<?PHP $u = new pocPath(''); echo $u->url; ?>" />
+  <base href="<?PHP echo pocEnv::$urlBase; ?>" />
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title><?PHP pocEcho::echoHtmlChars($poc->getTitle() . ': ' . $thePoc->getTitle()); ?></title>
+  <title><?PHP pocEnv::echoHtml("$poc->getTitle: $thePoc->getTitle"); ?></title>
   <style type="text/css">
   <!--
 
@@ -93,7 +93,7 @@ window.onload = function() {
 <?PHP
 
 foreach (pocError::fetchAll() as $error)
-  echo "window.alert('$error');\n";
+  echo "window.alert(\"$error\");\n";
 if ($closeWindow)
   echo "window.close();\n";
 
@@ -104,20 +104,20 @@ if ($closeWindow)
   </script>
 </head>
 <body>
-<form action="<?PHP $u = new pocPath('.'); echo $u->url; ?>" method="POST">
-<input type="hidden" name="poc" value="<?PHP pocEcho::echoHtmlChars($thePoc->path); ?>" />
+<form action="<?PHP $u = new pocPath('.'); echo $u->url; ?>" method="GET">
+<input type="hidden" name="poc" value="<?PHP pocEnv::echoHtml($thePoc->path); ?>" />
 <h1>Neues Poc</h1>
 <p>
   <span class="labello">Name:</span>
-  <input type="text" name="name" value="<?PHP pocEcho::echoHtmlChars($name); ?>" />
+  <input type="text" name="name" value="<?PHP pocEnv::echoHtml($name); ?>" />
 </p>
 <p>
   <span class="labello">Titel:</span>
-  <input type="text" name="title" value="<?PHP pocEcho::echoHtmlChars($title); ?>" />
+  <input type="text" name="title" value="<?PHP pocEnv::echoHtml($title); ?>" />
 </p>
 <p>
   <span class="labello">Inhalt:</span>
-  <textarea name="content"></textarea>
+  <textarea name="content"><?PHP pocEnv::echoHtml($content) ?></textarea>
 </p>
 <p>
   <span class="labello">Mode:</span>
@@ -129,6 +129,7 @@ if ($closeWindow)
   <input type="submit" name="submitButton" value="Neu" />
   <input type="button" name="cancel" value="Abbrechen" onclick="window.close();" />
 </p>
+<pre><?PHP pocLog::dump(); ?></pre>
 </form>
 </body>
 </html>

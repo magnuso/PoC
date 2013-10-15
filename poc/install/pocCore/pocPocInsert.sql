@@ -22,6 +22,14 @@ BEGIN
   DECLARE t, groupId BIGINT DEFAULT 0;
   DECLARE path TEXT DEFAULT '';
   bodyOfProc: BEGIN
+    DECLARE EXIT HANDLER FOR SQLWARNING
+      BEGIN
+        SELECT 400 AS id, 'SQLWARNING' AS name, 'pocPocInsert' AS content;
+      END;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+      BEGIN
+        SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
+      END;
     CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
     DELETE FROM pocTempSelect;
     SELECT 'pocCountSelect' AS className, 0 AS count;
@@ -53,7 +61,7 @@ BEGIN
       INTO n, t, groupId, userPrivs, groupPrivs, otherPrivs;
     INSERT INTO pocPoc (parentId, userId, groupId, created, createdById, modified, modifiedById,
           userPrivs, groupPrivs, otherPrivs, mode, name, title, content)
-        SELECT (inId, @pocUserId, groupId, t, @pocUserId, t, @pocUserId, userPrivs, groupPrivs, otherPrivs,
+        VALUES (inId, @pocUserId, groupId, t, @pocUserId, t, @pocUserId, userPrivs, groupPrivs, otherPrivs,
           inMode, inName, inTitle, inContent);
     SET inId = LAST_INSERT_ID();
     -- output

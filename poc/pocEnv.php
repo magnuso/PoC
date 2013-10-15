@@ -93,6 +93,7 @@ class pocEnv extends pocRow {
         while ($row = $q->fetch()) {
           $rowOK = $row["className"];
           $rows[] = $row;
+          $watch->time("fetch $rowOK");
         }
       } while ($q->nextRowset());
     } catch (Exception $e) {
@@ -113,7 +114,7 @@ class pocEnv extends pocRow {
     foreach ($rows as $row) {
       if (!$row["className"])
         $row["className"] = "pocError";
-# print_r($row);
+#self::pre_r($row);
       $row = new $row["className"]($row);
       if ($row->returnRow)
         $result[] = $row;

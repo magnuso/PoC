@@ -26,9 +26,8 @@ if ($thePoc = poc::open(pocEnv::$request['poc'])) {
       foreach (pocEnv::$request['mode'] as $v)
         $mode += $v;
     $thePoc->mode = $mode;
-    $thePoc->name = pocEnv::$request['name'];
-    $thePoc->title = pocEnv::$request['title'];
     $thePoc->content = pocEnv::$request['content'];
+    processRequest();
     $thePoc->update();
   }
 
@@ -62,9 +61,9 @@ pocEnv::header();
 ?><!DOCTYPE html>
 <html>
 <head>
-  <base href="<?PHP echo pocPath::$urlBase; ?>" />
+  <base href="<?PHP echo pocEnv::$urlBase; ?>" />
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title><?PHP pocEnv::echoHtml("$poc->getTitle: $thePoc->getTitle"; ?></title>
+  <title><?PHP pocEnv::echoHtml("$poc->getTitle: $thePoc->getTitle"); ?></title>
   <style type="text/css">
   <!--
 
@@ -108,12 +107,14 @@ pocEnv::header();
         <strong style="color:#369;"><?PHP
 
 $u = new pocPath('.', array("poc" => ""));
-$a = pocTag::create("a", '..', array("href" => $u->url));
+$a = pocTag::create("a", "...", array("href" => $u->url));
 $a->run();
 $path = new pocPath($thePoc->path);
 foreach ($path as $p) {
-  echo '/';
-  $u['poc'] = $p->path;
+  echo "/";
+  $u["poc"] = $p->path;
+  $a["href"] = $u->url;
+  $a->content = $p->name;
   $a->run();
 }
 
@@ -121,7 +122,7 @@ foreach ($path as $p) {
 <?PHP
 
 $u = new pocPath('.', array("poc" => $thePoc->path));
-$select = pocTag::create(PHP_EOL . "        select" . PHP_EOL . "        ", pocTag::create(PHP_EOL . "          option", "/..."), array("onchange" => "window.location.href='$u->url'+'%2F'+this.value;"));
+$select = pocTag::create(PHP_EOL . "        select" . PHP_EOL . "        ", pocTag::create(PHP_EOL . "          option", "..."), array("onchange" => "window.location.href='$u->url'+'%2F'+this.value;"));
 $rows = $thePoc->select(0, 0);
 foreach ($rows as $row)
   $select->push(pocTag::create(PHP_EOL . "          option", $row->name));
@@ -135,7 +136,7 @@ $select->run();
       <li>
         <label>
           <a href="<?PHP $u = new pocPath('./chown', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo "$thePoc->userName : $thePoc->groupName"; ?></a><br />
-          <a href="<?PHP $u = new pocPath('./chmod', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo rwx($thePoc->userPrivs) .'&nbsp;'. rwx($thePoc->groupPrivs) .'&nbsp;'. rwx($thePoc->otherPrivs); ?></a><br />
+          <a href="<?PHP $u = new pocPath('./chmod', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo rwx($thePoc->userPrivs) ."&nbsp;". rwx($thePoc->groupPrivs) ."&nbsp;". rwx($thePoc->otherPrivs); ?></a><br />
           <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $thePoc->created) . ' ' . $thePoc->createdByName; ?><br />
           <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $thePoc->modified) . ' ' . $thePoc->modifiedByName; ?>
         </label>
@@ -266,8 +267,22 @@ function rwx($priv) {
 }
 
 function xyMode($mode) {
-  $str = $mode & poc::NAVI_MODE? 'n': '-';
+  $str = $mode & poc::NAVI_MODE?   'n': '-';
+  $str = $mode & poc::SEARCH_MODE? 's': '-';
+  $str = $mode & poc::CACHE_MODE?  'c': '-';
   return $str;
+}
+
+function processRequest() {
+  foreach (pocEnv::$request as $k => $v) {
+    $matches = array();
+    if (preg_match('/^(\w+:\w+):?(.*)/', $k, $matches)) {
+      if ($object = pocRecord::open($matches[1])) {
+        $prop = $matches[2] ? $matches[2] : "content";
+        $object->$prop = $v;
+      }
+    }
+  }
 }
 
 pocEnv::quit();

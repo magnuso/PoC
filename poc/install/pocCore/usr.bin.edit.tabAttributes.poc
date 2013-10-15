@@ -36,18 +36,14 @@ $thePoc = poc::open(pocEnv::$request['poc']);
         <tbody>
 <?PHP
 
-function listAttributes($attributes, $path) {
-  $u = new pocPath('./attribute', array('poc' => $path));
-  foreach ($attributes as $a) {
-    if (is_array($a)) {
-      listAttributes($a, $path);
-    } else {
-      $u['identifier'] = $a->identifier;
+$u = new pocPath('./attribute', array('poc' => $thePoc->path));
+foreach ($thePoc as $a) {
+  $u['identifier'] = $a->identifier;
 ?>
           <tr>
-            <td class="fc"><span class="selectHolder"><strong><a href="#" onclick="return deletePocAttribute('<?PHP echo $a->identifier; ?>')">x</a></strong></span><a href="<?PHP echo $u->url; ?>" onclick="return launchPoc(this.href);"><span class="nameHolder"><?PHP echo $a->name; ?></span><?PHP pocEcho::echoHtmlChars($a->title); ?></a></td>
+            <td class="fc"><span class="selectHolder"><strong><a href="#" onclick="return deletePocAttribute('<?PHP echo $a->identifier; ?>')">x</a></strong></span><a href="<?PHP echo $u->url; ?>" onclick="return launchPoc(this.href);"><span class="nameHolder"><?PHP echo $a->name; ?></span><?PHP pocEnv::echoHtml($a->title); ?></a></td>
             <td>
-              <?PHP $i = $a->createInput(); $i['name'] = $a->identifier; $i['onfocus'] = 'onFocusInput(this);'; $i->echoTag(); ?>
+              <input type="text" name="<?PHP echo $a->identifier; ?>" value="<?PHP pocEnv::echoHtml($a->content); ?>" onfocus="onFocusInput(this);" />
             </td>
             <td class="tar">
               <?PHP echo $a->value; ?>
@@ -66,12 +62,7 @@ function listAttributes($attributes, $path) {
             </td>
           <tr>
 <?PHP
-    }
-  }
 }
-
-listAttributes($thePoc->attributes, $thePoc->path)
-
 ?>
         </tbody>
       </table>
