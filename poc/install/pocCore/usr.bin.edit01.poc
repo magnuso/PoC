@@ -10,7 +10,7 @@ Released under the MIT license
 http://poc-online.net/license
 
 -- pocPackage: pocCore
--- pocPath: usr/bin/edit
+-- pocPath: usr/bin/edit01
 -- pocUser: admin
 -- pocGroup: user
 -- pocPrivileges: rosiud ros--- ------
@@ -58,102 +58,94 @@ pocEnv::$request['poc'] = $thePoc->path;
 
 pocEnv::header();
 
-?><!DOCTYPE html>
+?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 <head>
   <base href="<?PHP echo pocEnv::$urlBase; ?>" />
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <title><?PHP pocEnv::echoHtml("$poc->getTitle: $thePoc->getTitle"); ?></title>
-  <style type="text/css">
-  <!--
-
-<?PHP $p = poc::open('./css'); $p->run(); ?>
-
-  -->
-  </style>
   <script src="js/jquery-1.10.2.min.js"></script>
   <script src="js/ckeditor/ckeditor.js"></script>
+<?PHP
+$p = poc::open("./css"); $p->run($thePoc);
+$p = poc::open("./js"); $p->run($thePoc);
+?>
   <script type="text/javascript">
 
-<?PHP $p = poc::open('./js'); $p->run(); ?>
+function pocModeChanged() {
+  $( "#pocMode" ).val(0);
+  $( ".modeBox" ).each (
+    function(index, element) {
+      $( "#pocMode" ).val($( "#pocMode" ).val() + element.val());
+    }
+  )
+}
+
+function pocSaveChanges() {
+  $( "#pocPostData" ).val("");
+  $( ".pocInput" ).each (
+    function(index, element) {
+      $( "#pocPostData" ).val($( "#pocMode" ).val() + element.val());
+    }
+  )
+}
 
   </script>
 </head>
 <body>
 <form action="<?PHP $u = new pocPath('.'); echo $u->url; ?>" method="POST">
 <input type="hidden" name="poc" value="<?PHP echo $thePoc->path; ?>" />
+<input type="hidden" class="pocInput" id="pocMode" name="<?PHP echo $thePoc->identifier; ?>:mode" value="<?PHP echo $thePoc->mode; ?>" />
+<input type="hidden" id="pocPostData" name="pocPostData" value="" />
 <div id="allDiv">
   <div id="topBar">
-    <span class="flr"><a href="#" onclick="return launchImg();">Bilder</a> &bull; <a href="<?PHP $u = new pocPath('~', array('logout' => 'ok')); echo $u->url; ?>">logout</a></span>
-    <ul id="topUl" class="noUl littleInput">
-      <li>
-        <label for="">&nbsp;</label>
-        <strong><?PHP pocEnv::echoHtml($poc->getTitle); ?></strong>
-      </li>
-      <li>
-        <label for="name">Name:</label>
-        <input type="text" name="<?PHP echo "$thePoc->identifier:"; ?>name" value="<?PHP pocEnv::echoHtml($thePoc->name); ?>" />
-      </li>
-      <li>
-        <label for="title">Title:</label>
-        <input type="text" name="<?PHP echo "$thePoc->identifier:"; ?>title" value="<?PHP pocEnv::echoHtml($thePoc->title); ?>" />
-      </li>
-      <li>
-        <label for="mode">Navi:</label>
-        <input type="checkbox" name="mode[]" value="<?PHP echo poc::NAVI_MODE; if ($thePoc->mode & poc::NAVI_MODE) echo '" checked="checked'; ?>" />
-      </li>
-      <li>
-        <label for="mode">Search:</label>
-        <input type="checkbox" name="mode[]" value="<?PHP echo poc::SEARCH_MODE; if ($thePoc->mode & poc::SEARCH_MODE) echo '" checked="checked'; ?>" />
-      </li>
-      <li>
-        <label for="mode">Cache:</label>
-        <input type="checkbox" name="mode[]" value="<?PHP echo poc::CACHE_MODE; if ($thePoc->mode & poc::CACHE_MODE) echo '" checked="checked'; ?>" />
-      </li>
-      <li style="min-width:180px;">
-        <label>Pfad:</label>
-        <strong style="color:#369;"><?PHP
+    <div class="noRap">
+      <div class="floatBox noRap">
+        <div class="floatBox noRap"><?PHP
 
 $u = new pocPath('.', array("poc" => ""));
-$a = pocTag::create("a", "...", array("href" => $u->url));
-$a->run();
-$path = new pocPath($thePoc->path);
-foreach ($path as $p) {
-  echo "/";
+$strong = pocTag::create("strong");
+$strong["class"] = "blueText";
+foreach (new pocPath($thePoc->path) as $p) {
   $u["poc"] = $p->path;
-  $a["href"] = $u->url;
-  $a->content = $p->name;
-  $a->run();
+  $strong->push(pocTag::create("a", $p->name ? $p->name : "...", array("href" => $u->url)));
+  $strong->push("/");
 }
-
-?></strong>
-<?PHP
+$strong->run();
 
 $u = new pocPath('.', array("poc" => $thePoc->path));
-$select = pocTag::create(PHP_EOL . "        select" . PHP_EOL . "        ", pocTag::create(PHP_EOL . "          option", "..."), array("onchange" => "window.location.href='$u->url'+'%2F'+this.value;"));
-$rows = $thePoc->select(0, 0);
-foreach ($rows as $row)
+$select = pocTag::create("select", pocTag::create(PHP_EOL . "          option", "..."), array("onchange" => "window.location.href='$u->url'+'%2F'+this.value;"));
+foreach ($thePoc->select(0, 0) as $row)
   $select->push(pocTag::create(PHP_EOL . "          option", $row->name));
 $select->run();
 
-?>
-      </li>
-      <li>
-        <label>Benutzer:<br />Rechte:<br />erzeugt:<br />geändert:</label>
-      </li>
-      <li>
-        <label>
-          <a href="<?PHP $u = new pocPath('./chown', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo "$thePoc->userName : $thePoc->groupName"; ?></a><br />
-          <a href="<?PHP $u = new pocPath('./chmod', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo rwx($thePoc->userPrivs) ."&nbsp;". rwx($thePoc->groupPrivs) ."&nbsp;". rwx($thePoc->otherPrivs); ?></a><br />
-          <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $thePoc->created) . ' ' . $thePoc->createdByName; ?><br />
-          <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $thePoc->modified) . ' ' . $thePoc->modifiedByName; ?>
-        </label>
-      </li>
-      <li class="flr">
-        <label for=""><strong><a href="<?PHP $u = new pocPath($thePoc->path); echo $u->url; ?>" target="_blank">Show!</a></strong></label>
-        <input type="submit" id="updateButton" name="update" value="Sichern" />
-      </li>
-    </ul>
+?></div>
+        <br clear="left" />
+        <div class="floatBox noRap">
+          <label for="name" class="smallText">Name:</label>
+          <input type="text" class="pocInput" name="<?PHP echo $thePoc->identifier; ?>:name" value="<?PHP pocEnv::echoHtml($thePoc->name); ?>" />
+          <label for="title" class="smallText">Title:</label>
+          <input type="text" class="pocInput" name="<?PHP echo $thePoc->identifier; ?>:title" value="<?PHP pocEnv::echoHtml($thePoc->title); ?>" />
+          <label for="mode" class="smallText">Navi:</label>
+          <input type="checkbox" class="modeBox" name="modeBox[]" value="<?PHP echo poc::NAVI_MODE; if ($thePoc->mode & poc::NAVI_MODE) echo '" checked="checked'; ?>" onchange="pocModeChanged()" />
+          <label for="mode" class="smallText">Search:</label>
+          <input type="checkbox" class="modeBox" name="modeBox[]" value="<?PHP echo poc::SEARCH_MODE; if ($thePoc->mode & poc::SEARCH_MODE) echo '" checked="checked'; ?>" onchange="pocModeChanged()" />
+          <label for="mode" class="smallText">Cache:</label>
+          <input type="checkbox" class="modeBox" name="modeBox[]" value="<?PHP echo poc::CACHE_MODE; if ($thePoc->mode & poc::CACHE_MODE) echo '" checked="checked'; ?>" onchange="pocModeChanged()" />
+        </div>
+      </div><div class="floatBox smallText">Benutzer:<br />Rechte:<br />erzeugt:<br />geändert:
+      </div><div class="floatBox smallText">
+        <a href="<?PHP $u = new pocPath('./chown', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo "$thePoc->userName : $thePoc->groupName"; ?></a><br />
+        <a href="<?PHP $u = new pocPath('./chmod', array('poc' => $thePoc->path)); echo $u->url; ?>" onclick="return launchPoc(this.href);"><?PHP echo rwx($thePoc->userPrivs) ."&nbsp;". rwx($thePoc->groupPrivs) ."&nbsp;". rwx($thePoc->otherPrivs); ?></a><br />
+        <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $thePoc->created) . ' ' . $thePoc->createdByName; ?><br />
+        <?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $thePoc->modified) . ' ' . $thePoc->modifiedByName; ?>
+      </div><div class="floatBox smallText rightText">
+        <input type="submit" id="updateButton" name="update" value="Sichern" /><br />
+        <strong><a href="<?PHP $u = new pocPath($thePoc->path); echo $u->url; ?>" target="_blank">Show!</a><br />
+        <a href="#" onclick="return launchImg();">Bilder</a><br />
+        <?PHP $u = new pocPath('~', array("logout" => "ok")); $a = pocTag::create("a", "logout", array("href" => $u->url)); $a->run(); ?></strong>
+      </div>
+    </div>
   </div>
 <!--
 
@@ -168,16 +160,23 @@ $select->run();
         <li><a href="#" onclick="return showTab('attributesDiv');">Attribute</a></li>
       </ul>
     </div>
-    <div class="overDiv">
-      <table id="selectTable" cellspacing="1">
+    <div class="divBox noRap">
+      <input type="button" name="new" value="Neues Poc" onclick="launchPoc('<?PHP $u = new pocPath('./insertpoc', array('poc' => $thePoc->path)); echo $u->url; ?>')" /> &bull;
+      <input type="submit" name="delete" value="Löschen" onclick="document.pocDoDelete=true" /> &bull;
+      <input type="button" name="copy" value="Kopieren" onclick="launchPoc('<?PHP $u = new pocPath('./copypoc', array('poc' => $thePoc->path)); echo $u->url; ?>')" />
+      <input type="button" name="move" value="Verschieben" onclick="launchPoc('<?PHP $u = new pocPath('./movepoc', array('poc' => $thePoc->path)); echo $u->url; ?>')" />
+    </div>
+    <div id="treeTableBox">
+      <table id="selectTable" cellspacing="0">
         <tr>
-          <th width="50%"><span class="selectHolder">&nbsp;</span><span class="nameHolder">Name</span>Titel</th>
-          <th>Eigentümer</th>
-          <th>Rechte</th>
-          <th>Mode</th>
-          <th>geändert</th>
-          <th>von</th>
-          <th>Kinder</th>
+          <th width="15%"><div class="spacer2em">&nbsp;</div> Name</th>
+          <th width="35%">Titel</th>
+          <th width="5%">Mode</th>
+          <th width="5%">Kinder</th>
+          <th width="10%">geändert</th>
+          <th width="10%">von</th>
+          <th width="10%">Eigentümer</th>
+          <th width="10%">Rechte</th>
         <tr>
 <?PHP
 
@@ -188,25 +187,21 @@ foreach ($thePoc->select(0, 0) as $p) {
   $t = pocTag::create("a", $p->title, array("href" => $u->url));
 ?>
         <tr>
-          <td><span class="selectHolder"><input type="checkbox" name="selection[]" value="<?PHP pocEnv::echoHtml($thePoc->path . '/' . $p->name); ?>" /></span><span class="nameHolder"><?PHP $n->run(); ?></span><?PHP $t->run(); ?></td>
-          <td><?PHP echo "$p->userName:$p->groupName"; ?></td>
-          <td><?PHP echo rwx($p->userPrivs) .'&nbsp;'. rwx($p->groupPrivs) .'&nbsp;'. rwx($p->otherPrivs); ?></td>
+          <td><div class="spacer2em"><input type="checkbox" name="selection[]" value="<?PHP pocEnv::echoHtml($thePoc->path . '/' . $p->name); ?>" /></div>
+            <?PHP $n->run(); ?></td>
+          <td><?PHP $t->run(); ?></td>
           <td><?PHP echo xyMode($p->mode); ?></td>
-          <td><?PHP echo str_replace(' ', '&nbsp;', date(pocEnv::$env['pocDateTimeFormat'], $p->modified)); ?></td>
-          <td><?PHP pocEnv::echoHtml($p->modifiedByName); ?></td>
           <td class="tar"><?PHP echo $p->children; ?></td>
+          <td><?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $p->modified); ?></td>
+          <td><?PHP pocEnv::echoHtml($p->modifiedByName); ?></td>
+          <td><?PHP echo "$p->userName:$p->groupName"; ?></td>
+          <td><?PHP echo rwx($p->userPrivs) . " " . rwx($p->groupPrivs) . " " . rwx($p->otherPrivs); ?></td>
         <tr>
 <?PHP
 }
 
 ?>
       </table>
-    </div>
-    <div class="bottomBar">
-      <input type="button" name="new" value="Neues Poc" onclick="launchPoc('<?PHP $u = new pocPath('./insertpoc', array('poc' => $thePoc->path)); echo $u->url; ?>')" /> &bull;
-      <input type="submit" name="delete" value="Löschen" onclick="document.pocDoDelete=true" /> &bull;
-      <input type="button" name="copy" value="Kopieren" onclick="launchPoc('<?PHP $u = new pocPath('./copypoc', array('poc' => $thePoc->path)); echo $u->url; ?>')" />
-      <input type="button" name="move" value="Verschieben" onclick="launchPoc('<?PHP $u = new pocPath('./movepoc', array('poc' => $thePoc->path)); echo $u->url; ?>')" />
     </div>
   </div>
 <!--

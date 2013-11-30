@@ -20,6 +20,7 @@ class pocRecord extends pocRow {
   protected static $lastInserted = NULL;
 
   protected $identifier;
+  protected $insertFlag = FALSE;
   protected $userId = 1;
   protected $userName = "admin";
   protected $created = 0;
@@ -39,22 +40,18 @@ class pocRecord extends pocRow {
   protected $deletePriv = FALSE;
 
   public function __construct($row = array()) {
-    $identifier = get_class($this) . ":$row[id]";
-    if ($row["updateFlag"]) {
-      if ($original = self::$cache[$identifier]) {
+    parent::__construct($row);
+    $this->identifier = get_class($this) . ":$this->id";
+    if ($this->cacheMe) {
+      if ($original = self::$cache[$this->identifier]) {
         foreach ($row as $k => $v)
           $original->$k = $v;
       } else {
-        pocError::create(404, "Not found", "for cache-update: $identifier");
+        self::$cache[$this->identifier] = $this;
       }
-    } else {
-      parent::__construct($row);
-      $this->identifier = $identifier;
-      if ($this->cacheMe && !self::$cache[$identifier])
-        self::$cache[$identifier] = $this;
-      if ($this->insertFlag)
-        self::$lastInserted = $this;
     }
+    if ($this->insertFlag)
+      self::$lastInserted = $this;
   }
 
   public function __toString() {
@@ -137,8 +134,7 @@ class pocRecord extends pocRow {
 
   # create params
   public static function dump() {
-    foreach (self::$cache as $k => $v)
-      pocEnv::echoHtml("[$k] => $v" . PHP_EOL);
+    print_r(self::$cache);
   }
 
 }

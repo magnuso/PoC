@@ -20,6 +20,7 @@ BEGIN
   bodyOfProc: BEGIN
     DECLARE cur CURSOR FOR SELECT id, path FROM pocTempSelect WHERE hit > 0 ORDER BY path;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
     OPEN cur;
     theLoop: LOOP
       FETCH cur INTO loopId, loopPath;
@@ -44,7 +45,7 @@ BEGIN
           tp.userPrivs + 0 AS userPrivs, tp.groupPrivs + 0 AS groupPrivs, tp.otherPrivs + 0 AS otherPrivs,
           tuc.name AS createdByName, tum.name AS modifiedByName,
           runPriv, openPriv, selectPriv, insertPriv, updatePriv, deletePriv, userName, groupName,
-          tp.name, tp.title, tp.content, tp.mode, (SELECT COUNT(tc.id) FROM pocPoc AS tc WHERE tc.parentId = tp.id) AS children
+          tp.name, tp.title, tp.content, tp.mode + 0 AS mode, (SELECT COUNT(tc.id) FROM pocPoc AS tc WHERE tc.parentId = tp.id) AS children
         FROM pocPoc AS tp
         LEFT JOIN pocUser AS tuc ON tuc.id = tp.createdById
         LEFT JOIN pocUser AS tum ON tum.id = tp.modifiedById

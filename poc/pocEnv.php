@@ -22,6 +22,7 @@ class pocEnv extends pocRow {
   public static $user = array();
 
   public static $urlBase = ""; # !!!
+  public static $fixPath = FALSE;
 
   public function __construct($row = array()) {
     if (self::$dbh || self::$singleton) {
@@ -54,6 +55,8 @@ class pocEnv extends pocRow {
     if (get_magic_quotes_gpc())
       array_walk_recursive(self::$request, function(&$v) { $v = stripslashes($v); });
     # fix PATH_INFO
+    if (self::$fixPath)
+      self::fixPathInfo();
     self::$env["PATH_INFO"] = pocPath::trim(self::$env["PATH_INFO"]);
     # set base url
     self::$urlBase = self::makeHttpBase();
@@ -114,7 +117,6 @@ class pocEnv extends pocRow {
     foreach ($rows as $row) {
       if (!$row["className"])
         $row["className"] = "pocError";
-#self::pre_r($row);
       $row = new $row["className"]($row);
       if ($row->returnRow)
         $result[] = $row;
@@ -142,6 +144,13 @@ class pocEnv extends pocRow {
 
   public static function echoHtml2br($text) {
     echo nl2br(htmlspecialchars($text));
+  }
+
+  # fix $_ENV["PATH_INFO"]
+  public static function fixPathInfo() {
+    list ($a, $b) = explode('?', pocEnv::$env['REQUEST_URI']);
+    list ($a, $b) = explode('.php', $a);
+    pocEnv::$env['PATH_INFO'] = $b;
   }
 
   # http header

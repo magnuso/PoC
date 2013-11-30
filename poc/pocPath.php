@@ -89,13 +89,15 @@ class pocPath implements ArrayAccess, IteratorAggregate {
 
   # IteratorAggregate
   public function getIterator() {
-    $out = array();
+    $out = array("" => new pocPath(""));
     $path = "";
     $slash = "";
-    foreach (explode("/", $this->myPath) as $name) {
-      $path .= "$slash$name";
-      $out[$path] = new pocPath($path);
-      $slash = "/";
+    if ($this->myPath) {
+      foreach (explode("/", $this->myPath) as $name) {
+        $path .= "$slash$name";
+        $out[$path] = new pocPath($path);
+        $slash = "/";
+      }
     }
     return new ArrayIterator($out);
   }

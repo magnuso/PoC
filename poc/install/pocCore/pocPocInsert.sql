@@ -22,16 +22,9 @@ BEGIN
   DECLARE t, groupId BIGINT DEFAULT 0;
   DECLARE path TEXT DEFAULT '';
   bodyOfProc: BEGIN
-    DECLARE EXIT HANDLER FOR SQLWARNING
-      BEGIN
-        SELECT 400 AS id, 'SQLWARNING' AS name, 'pocPocInsert' AS content;
-      END;
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-      BEGIN
-        SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
-      END;
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
-    DELETE FROM pocTempSelect;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
+    --
+    CALL pocPocCreateTempTables;
     SELECT 'pocCountSelect' AS className, 0 AS count;
     --
     IF inId > 0 THEN
@@ -56,8 +49,8 @@ BEGIN
       SET path = CONCAT(path, '/');
     END IF;
     --
-    SELECT COUNT(*), UNIX_TIMESTAMP(), groupId, userPrivs, groupPrivs, otherPrivs
-      FROM pocPoc WHERE id = inId
+    SELECT COUNT(tp.id), UNIX_TIMESTAMP(), tp.groupId, tp.userPrivs, tp.groupPrivs, tp.otherPrivs
+      FROM pocPoc AS tp WHERE tp.id = inId
       INTO n, t, groupId, userPrivs, groupPrivs, otherPrivs;
     INSERT INTO pocPoc (parentId, userId, groupId, created, createdById, modified, modifiedById,
           userPrivs, groupPrivs, otherPrivs, mode, name, title, content)
@@ -65,20 +58,7 @@ BEGIN
           inMode, inName, inTitle, inContent);
     SET inId = LAST_INSERT_ID();
     -- output
-    SELECT 'poc' AS className, 1 AS insertFlag, tp.*, path,
-        (@pocAdmin OR FIND_IN_SET('run', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('run', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('run', tp.groupPrivs))) + 0 AS runPriv,
-        1 AS openPriv,
-        (@pocAdmin OR FIND_IN_SET('select', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('select', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('select', tp.groupPrivs))) + 0 AS selectPriv,
-        (@pocAdmin OR FIND_IN_SET('insert', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('insert', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('insert', tp.groupPrivs))) + 0 AS insertPriv,
-        (@pocAdmin OR FIND_IN_SET('update', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('update', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('update', tp.groupPrivs))) + 0 AS updatePriv,
-        (@pocAdmin OR FIND_IN_SET('delete', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('delete', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('delete', tp.groupPrivs))) + 0AS deletePriv,
-        tu.name AS userName, tg.name AS groupName, tuc.name AS createdByName, tum.name AS modifiedByName
-      FROM pocPoc AS tp
-      LEFT JOIN pocUser2Group AS tu2g ON tu2g.groupId = tp.groupId AND tu2g.userId = @pocUserId
-      LEFT JOIN pocUser AS tu ON tu.id = tp.userId
-      LEFT JOIN pocGroup AS tg ON tg.id = tp.groupId
-      LEFT JOIN pocUser AS tuc ON tuc.id = tp.createdById
-      LEFT JOIN pocUser AS tum ON tum.id = tp.modifiedById
-      WHERE tp.id = inId;
+    INSERT INTO pocTempSelect (id, hit, path) VALUES (inId, 1, pocPocPathFromId(inId));
+    CALL pocPocCreatePocs();
   END bodyOfProc;
 END;

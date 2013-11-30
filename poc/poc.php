@@ -38,8 +38,12 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   const MAGIC_DROP_QUEUE = "_listener";
   const VARCHAR_LIMIT = 191;
 
-  const SELECT_DEFAULT_CLASS = __CLASS__;
-  const SELECT_DEFAULT_MODE = 1; # NAVI_MODE
+  const RESULT_MODE_OFF = 0;
+  const RESULT_MODE_POCS = 1;
+  const RESULT_MODE_ROWS = 2;
+
+  const SELECT_DEFAULT_RESULT_MODE = 1; # !!! TO DO
+  const SELECT_DEFAULT_POC_MODE = 1; # NAVI_MODE
 
   private static $cacheByPath = array();
 
@@ -62,8 +66,7 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   public function __construct($row = array()) {
     $this->cacheMe = TRUE;
     parent::__construct($row);
-    if (!self::$cacheByPath[$this->path])
-      self::$cacheByPath[$this->path] = $this;
+    self::$cacheByPath[$this->path] = self::$cache[$this->identifier];
   }
 
   public function __get($key) {
@@ -79,10 +82,14 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   # magic
   public function __call($name, $params) {
-    if ($method = $this->drop($name, self::MAGIC_DROP_QUEUE) && $method = $method->debit)
-      return $method->run($this, $params);
-    else
+    if ($method = $this->drop($name, self::MAGIC_DROP_QUEUE)) {
+      if ($method = $method->debit)
+        return $method->run($this, $params);
+      else
+        pocError::create(400, "Bad Request", "Magic Call: $this->path" . "->$name(..)");
+    } else {
       pocError::create(404, "Not Found", "Magic Call: $this->path" . "->$name(..)");
+    }
   }
 
   # arrayaccess to attributes
@@ -176,6 +183,11 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
     return $newPoc;
   }
 
+  public function update() {
+    unset(self::$cacheByPath[$this->path]);
+    return parent::update();
+  }
+
   public function delete() {
     if ($ok = parent::delete()) {
       foreach($this->attributesCache as $attribute)
@@ -214,22 +226,22 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   public function chmod($userPrivs, $groupPrivs, $otherPrivs, $recursive) {
     pocError::fetch(__CLASS__ . "::" . __METHOD__ . "($this->id)");
-    pocEnv::call("pocPocChmod", array($this->id, $userPrivs, $groupPrivs, $otherPrivs, $recursive));
+    pocEnv::call("pocPocChmod", array($this->id, $userPrivs, $groupPrivs, $otherPrivs, $recursive ? 1 : 0));
     return !pocError::hasError();
   }
 
   # select($resultClass, $pocMode, $nameLike, $contentLike, );
-  # also creates a temporary table of results for subsequent finds.
+  # also creates in the db a temporary table of results for subsequent finds.
   # ATTENTION! the temporary table can't be nested. subsequent finds work on any poc.
   #
   public function select() {
     pocError::fetch("poc->selectTree($this->path)");
     $args = func_get_args();
-    $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
-    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
-    $nameLike = count($args) ? array_shift($args) : '%';
-    $contentLike = count($args) ? array_shift($args) : '%';
-    return pocEnv::call("pocPocSelect", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
+    $resultMode = count($args) ? array_shift($args) : SELECT_DEFAULT_RESULT_MODE;
+    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_POC_MODE;
+    $nameLike = count($args) ? array_shift($args) : "%";
+    $contentLike = count($args) ? array_shift($args) : "%";
+    return pocEnv::call("pocPocSelect", array($this->id, $resultMode, $pocMode, $nameLike, $contentLike));
   }
 
   public function selectTree() {
@@ -237,8 +249,8 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
     $args = func_get_args();
     $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
     $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
-    $nameLike = count($args) ? array_shift($args) : '%';
-    $contentLike = count($args) ? array_shift($args) : '%';
+    $nameLike = count($args) ? array_shift($args) : "%";
+    $contentLike = count($args) ? array_shift($args) : "%";
     return pocEnv::call("pocPocSelectTree", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
   }
 
@@ -247,8 +259,8 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
     $args = func_get_args();
     $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
     $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
-    $nameLike = count($args) ? array_shift($args) : '%';
-    $contentLike = count($args) ? array_shift($args) : '%';
+    $nameLike = count($args) ? array_shift($args) : "%";
+    $contentLike = count($args) ? array_shift($args) : "%";
     return pocEnv::call("pocPocSelectStem", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
   }
 
@@ -340,6 +352,24 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   # create params
   protected static function getCreateParams() {
     return array("name" => "", "title" => "", "content" => "", "mode" => 0);
+  }
+
+  # some tools...
+  public static function rwx($priv) {
+    $str = $priv & poc::RUN_PRIV? "r": "-";
+    $str .= $priv & poc::OPEN_PRIV? "o": "-";
+    $str .= $priv & poc::SELECT_PRIV? "s": "-";
+    $str .= $priv & poc::INSERT_PRIV? "i": "-";
+    $str .= $priv & poc::UPDATE_PRIV? "u": "-";
+    $str .= $priv & poc::DELETE_PRIV? "d": "-";
+    return $str;
+  }
+
+  public static function xyMode($mode) {
+    $str = $mode & poc::NAVI_MODE?   "n": "-";
+    $str .= $mode & poc::SEARCH_MODE? "s": "-";
+    $str .= $mode & poc::CACHE_MODE?  "c": "-";
+    return $str;
   }
 
 }

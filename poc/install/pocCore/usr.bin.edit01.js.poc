@@ -10,7 +10,7 @@ Released under the MIT license
 http://poc-online.net/license
 
 -- pocPackage: pocCore
--- pocPath: usr/bin/edit/js
+-- pocPath: usr/bin/edit01/js
 -- pocUser: admin
 -- pocGroup: user
 -- pocPrivileges: rosiud ros--- ------
@@ -21,6 +21,7 @@ http://poc-online.net/license
 $thePoc = poc::open(pocEnv::$request['poc']);
 
 ?>
+  <script type="text/javascript">
 
 document.inputsToSave = new Array();
 document.dontLeave = true;
@@ -231,3 +232,5 @@ if (!$thePoc->content || (!strpos(" $thePoc->content", '<?PHP') && strpos($thePo
   }
   showTab(tab);
 };
+
+  </script>

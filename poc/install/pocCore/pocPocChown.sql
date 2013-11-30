@@ -17,8 +17,14 @@ CREATE PROCEDURE pocPocChown (
     IN inGroup VARCHAR(64),
     IN deep INT)
 BEGIN
+  DECLARE inUserId, inGroupId BIGINT DEFAULT 0;
   DECLARE n, priv, mode INT DEFAULT 0;
   bodyOfProc: BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+      BEGIN
+        SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocChown' AS content;
+      END;
+    --
     CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
     CREATE TEMPORARY TABLE IF NOT EXISTS pocTempIds (tempId BIGINT, path TEXT);
     DELETE FROM pocTempSelect;
@@ -34,8 +40,8 @@ BEGIN
       LEAVE bodyOfProc;
     END IF;
     -- check inUser
-    IF inUser > 0 THEN
-      SELECT COUNT(*), (@pocAdmin OR id = @pocUserId) + 0 FROM pocUser WHERE id = inUser INTO n, priv;
+    IF STRCMP(inUser, '') != 0 THEN
+      SELECT COUNT(*), (@pocAdmin OR id = @pocUserId) + 0 FROM pocUser AS tu WHERE tu.name = inUser INTO n, priv;
       IF n = 0 THEN
         SELECT 404 AS id, 'Not Found' AS name, 'pocPocChown userId' AS content;
         LEAVE bodyOfProc;

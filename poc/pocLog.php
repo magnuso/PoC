@@ -43,10 +43,15 @@ class pocLog extends pocRow {
     return self::$startTime;
   }
 
-  public static function dump() {
-    foreach(self::$entries as $log)
-      echo $log->__toString() . PHP_EOL;
-    printf("now: %.3f%s", self::time(), PHP_EOL);
+  public static function dump($html = FALSE) {
+    $out = "";
+    foreach (self::$entries as $log)
+      $out .= $log->__toString() . PHP_EOL;
+    $out .= sprintf("now: %.3f", self::time()) . PHP_EOL;
+    if ($html)
+      pocEnv::echoHtml($out);
+    else
+      echo $out;
   }
 
   protected static function getCreateParams() {
@@ -129,6 +134,12 @@ class pocError extends pocRow {
     return "pocError: " . $this->content;
   }
 
+  public function brief() {
+    $brief = array_pop(explode("*", $this->content));
+    $brief = array_shift(explode(PHP_EOL, $brief));
+    return "pocError: " . array_shift(explode(PHP_EOL, $this->brief)) . " - $brief";
+  }
+
   public static function hasError() {
     return self::$last ? TRUE : FALSE;
   }
@@ -152,13 +163,40 @@ class pocError extends pocRow {
     return $errors;
   }
 
-  public static function dump() {
+  public static function dump($html = FALSE) {
+    $out = "";
     foreach (self::$errors as $err)
-      echo $err->__toString() . PHP_EOL;
+      $out .= $err->__toString() . PHP_EOL;
+    if ($html)
+      pocEnv::echoHtml($out);
+    else
+      echo $out;
   }
 
   protected static function getCreateParams() {
     return array("id" => 418, "name" => "I’m a teapot", "content" => "", "previous" => NULL);
+  }
+
+}
+
+/******************************************************************************/
+
+class pocEchoSelect extends pocLog {
+
+  public function __construct($row = array()) {
+    unset($row["className"]);
+    $newRow = array("name" => "pocEchoSelect", "content" => "", "level" => 0);
+    if ($row["name"]) {
+      $newRow["name"] = $row["name"];
+      unset($row["name"]);
+    }
+    echo PHP_EOL . $newRow["name"] . PHP_EOL;
+    foreach ($row as $k => $v) {
+      $line = "  $k: $v" . PHP_EOL;
+      echo $line;
+      $newRow["content"] += $line;
+    }
+    parent::__construct($newRow);
   }
 
 }

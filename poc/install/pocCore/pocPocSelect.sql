@@ -14,7 +14,7 @@ http://poc-online.net/license
 CREATE PROCEDURE pocPocSelect (
     IN inId BIGINT,
     IN resultMode INT,
-    IN pocMode INT,
+    IN inMode INT,
     IN likeName VARCHAR(64),
     IN likeContent TEXT)
 BEGIN
@@ -22,6 +22,8 @@ BEGIN
   DECLARE selectPriv INT DEFAULT 0;
   DECLARE path TEXT DEFAULT '';
   bodyOfProc: BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
+    --
     DELETE FROM pocTempSelect;
     IF inId > 0 THEN
       SET path = pocPocPathFromId(inId);
@@ -30,21 +32,23 @@ BEGIN
         LEAVE bodyOfProc;
       END IF;
       IF NOT pocPocCheckPriv(inId, 'select') THEN
-        SELECT 404 AS id, 'Not Found' AS name, 'pocPocSelect' AS content;
+        SELECT 403 AS id, 'Forbidden' AS name, 'pocPocSelect' AS content;
         LEAVE bodyOfProc;
       END IF;
-      SET path = CONCAT(path, '/');
+      IF STRCMP(path, '') > 0 THEN
+        SET path = CONCAT(path, '/');
+      END IF;
     END IF;
     --
     INSERT INTO pocTempSelect (id, sel, hit, path) SELECT id, 0, 1, CONCAT(path, name)
       FROM pocPoc
       WHERE parentId = inId AND pocPocCheckPriv(id, 'open') AND
-        (pocMode = 0 OR pocMode & mode) AND (name LIKE(likeName) OR content LIKE(likeContent));
+        (inMode = 0 OR inMode & mode) AND (name LIKE(likeName) OR content LIKE(likeContent));
     SELECT 'pocCountSelect' AS className, COUNT(*) AS count FROM pocTempSelect;
     --
-    IF resultMode = 0 THEN
+    IF resultMode = 1 THEN
       CALL pocPocCreatePocs;
-    ELSEIF resultMode = 1 THEN
+    ELSEIF resultMode = 2 THEN
       CALL pocPocCreateResults('');
     END IF;
   END bodyOfProc;

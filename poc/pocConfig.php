@@ -20,6 +20,8 @@ if (!pocEnv::started()) {
 #  pocEnv::$env = $_ENV; # ... check phpinfo();
   pocEnv::$request = $_REQUEST;
 
+#  pocEnv::$fixPath = TRUE; # in case $_ENV["PATH_INFO"] doesn't work ... check phpinfo();
+
   pocEnv::$session["dbName"] = "record";
   pocEnv::$session["dbHost"] = "localhost";
   pocEnv::$session["dbPort"] = "";
@@ -27,8 +29,8 @@ if (!pocEnv::started()) {
   pocEnv::$session["dbPassword"] = "UVn4r3YJV6zhzvvV";
   pocEnv::$session["dbOptions"] = array(); # NO, NO, NEVER EVER USE A PERSISTANT CONNECTION!!!!!!!!
 
-  pocEnv::$session["sessionExpires"] = 1200; # 1200 = 20 min
-  pocEnv::$session["cookieExpires"] = 86400; # 604800 = 1 week
+  pocEnv::$session["sessionExpires"] = 1200; # 1200 sec = 20 min
+  pocEnv::$session["cookieExpires"] = 259200; # 86400 sec = 24 h, 604800 sec = 1 week
 
   pocEnv::$session["pocPDOClass"] = "pocMySqlPDO";
 

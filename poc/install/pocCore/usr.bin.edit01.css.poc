@@ -1,3 +1,5 @@
+<?PHP
+
 /*******************************************************************************
 
 PoC Web-Application-Framwork
@@ -8,7 +10,7 @@ Released under the MIT license
 http://poc-online.net/license
 
 -- pocPackage: pocCore
--- pocPath: usr/bin/edit/css
+-- pocPath: usr/bin/edit01/css
 -- pocUser: admin
 -- pocGroup: user
 -- pocPrivileges: rosiud ros--- ------
@@ -16,14 +18,33 @@ http://poc-online.net/license
 
 *******************************************************************************/
 
-body { font: 100.01%/120.01% Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: #eee; margin: 0px auto; padding: 0px; }
+$thePoc = poc::open(pocEnv::$request['poc']);
 
+?>
+  <style type="text/css">
+  <!--
+
+body { font: 100.01%/141.42% Arial, "Helvetica Neue", Helvetica, sans-serif; color: black; background: #eee; margin: 0px; padding: 0px; }
 div, ul, ol, li, textarea, label, table, td, tr, form { margin: 0px; padding: 0px; border: 0px; }
 
-table { padding: 14px; background: #eee; }
-td { min-width: 48px; padding: 2px; text-align: center; }
-td.ltd { text-align: left; }
-td.rtd { text-align: right; }
+.divBox { margin-left: 8px; margin-bottom: 8px; }
+.floatBox { display: inline; float: left; margin-left: 8px; margin-bottom: 8px; }
+.tableBox { position: relative; left: 0px; right: 0px; margin-left: 8px; margin-bottom: 8px; overflow: auto; background: #9cf; }
+.clearBoth { clear: both; }
+.noRap { white-space: nowrap; }
+.spacer2em { float: left; width: 2em; }
+.spacer3em { float: left; width: 3em; }
+
+.smallText { font-size: 70.71%; line-height: 200.01%; }
+.centerText { text-align: center; }
+.rightText { text-align: right; }
+
+.blueText { color: #369; }
+
+.minWidth480 { min-width: 480px; }
+.minWidth520 { min-width: 520px; }
+
+
 
 a:link { color: #69c; text-decoration: none; }
 a:visited { color: #369; }
@@ -33,10 +54,20 @@ a:active { color: #f00; }
 
 textarea { font: 80.01%/140.01% "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace; }
 
-#allDiv { position: relative; min-width: 100%; min-height: 100%; }
-#topBar { position: fixed; top: 0px; right: 0px; left: 0px; padding: 8px; background: #eee; }
+#allDiv { position: relative; min-width: 100%; min-height: 100%; margin: 0px auto; overflow: auto; }
+#topBar { position: fixed; top: 0px; right: 0px; left: 0px; padding: 8px; }
 
-.mainDiv { position: fixed; top: 0px; right: 0px; left: 0px; bottom: 0px; margin: 96px 8px 48px 8px; padding: 16px; border: 1px solid #999; background: #fff; }
+.mainDiv { position: fixed; top: 0px; right: 0px; left: 0px; bottom: 0px; margin: 108px 16px 16px 16px; padding: 16px; background: #fff;
+  -webkit-box-shadow: 5px 10px 10px #ccc;	/* webkit browser*/
+  -moz-box-shadow: 5px 10px 10px #ccc;	/* firefox */
+  box-shadow: 5px 10px 10px #ccc;
+}
+
+.switchedDiv { position: relative; top: 0px; right: 0px; left: 0px; bottom: 0px; margin: 108px 16px 16px 16px; padding: 16px; background: #fff;
+  -webkit-box-shadow: 10px 10px 10px #999;	/* webkit browser*/
+  -moz-box-shadow: 10px 10px 10px #999;	/* firefox */
+  box-shadow: 10px 10px 10px #999;
+}
 
 #pocDiv { visibility: hidden; }
 #contentDiv { visibility: visible; }
@@ -66,13 +97,13 @@ ul .noUl { display: inline-block; float: left; }
 .tabBar a:visited { color: #333; }
 .tabBar a:hover { color: #999; text-decoration: underline; }
 
-.bottomBar { position: fixed; right: 0px; left: 0px; bottom: 0px; height: 24px; padding: 12px; overflow: hidden; }
+#treeTableBox { position: absulute; top: 48px; right: 16px; bottom: 16px; left: 16px; overflow: auto; background: #9cf; }
 
-#selectTable { width: 100%; margin: 0px; padding: 4px; }
+#selectTable { position: relative; width: 100%; margin: 0px; }
 #selectTable textarea, #selectTable input { border: 1px solid #999; }
-#selectTable td, #selectTable th { text-align: left; padding: 2px 8px 2px 8px; }
-#selectTable td.tar { text-align: right; }
+#selectTable td, #selectTable th { text-align: left; padding: 2px 8px 2px 8px; white-space: nowrap; overflow: hidden; }
 #selectTable th { font-weight: normal; background: #ccc; }
+#selectTable td.tar { text-align: right; }
 #selectTable tr { padding: 2px; max-height: 3em; overflow: hidden; }
 #selectTable tr:hover { background: #ddd; }
 #selectTable a:link { font-weight: normal; }
@@ -80,3 +111,6 @@ ul .noUl { display: inline-block; float: left; }
 .nameHolder { display: inline-block; min-width: 120px; margin: 0px 8px 0px 8px; border-right: 1px solid #eee; }
 
 .overDiv { width: 100%; height: 100%; overflow: scroll; }
+
+  -->
+  </style>

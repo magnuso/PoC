@@ -1,0 +1,106 @@
+<?PHP
+
+pocEnv::header();
+
+switch (pocEnv::$request["action"]) {
+
+  case "update": # save changes
+    pocError::fetch("PoC-Edit: save changes");
+    $psToSave = array();
+    foreach(pocEnv::$request as $toSave => $data) {
+      $matches = array();
+      if (preg_match('/(\w+):(\w+):?(\w*)/', $toSave, $matches)) {
+        if ($toSave = pocRecord::open("$matches[1]:$matches[2]")) {
+          $prop = $matches[3] ? $matches[3] : "content";
+          $toSave->$prop = $data;
+          $psToSave[$toSave->identifier] = $toSave;
+        }
+      }
+    }
+    foreach ($psToSave as $p)
+      $p->update();
+    break;
+
+  case "selectPoc": # save changes
+    pocError::fetch("PoC-Edit: selectPoc");
+    if (!$thePoc = poc::open(pocEnv::$request["poc"]))
+      return;
+    $path = new pocPath($thePoc->path);
+    $pp = pocTag::create("  p  " . PHP_EOL);
+    $slash = "";
+    foreach($path as $p) {
+      $pp->push($slash);
+      $pp->push(pocTag::create("a", $p->name ? $p->name : "...", array("href" => "#", "title" => $p->path)));
+      $slash = "/";
+    }
+    $pp->run();
+    $table = pocTag::create("  table  " . PHP_EOL, NULL, array("cellspacing" => 0, "width" => "100%"));
+    foreach ($thePoc->select(1, 0) as $p) {
+      $tr = pocTag::create("    tr    " . PHP_EOL);
+      $tr->push(pocTag::create("      td      " . PHP_EOL, pocTag::create("a", $p->name, array("href" => "#", "title" => $p->path)), array("width" => "80%")));
+      $tr->push(pocTag::create("      td      " . PHP_EOL, pocTag::create("a", $p->title, array("href" => "#", "title" => $p->path))));
+      $table->push($tr);
+    }
+    $table->run();
+    break;
+
+  case "copy": # copy pocs
+    pocError::fetch("PoC-Edit: copy");
+    foreach (pocEnv::$request["selection"] as $p) {
+      if ($p = poc::open($p))
+        $p->copy(pocEnv::$request["destination"]);
+    }
+    break;
+
+  case "move": # move pocs
+    pocError::fetch("PoC-Edit: move");
+    foreach (pocEnv::$request["selection"] as $p) {
+      if ($p = poc::open($p))
+        $p->move(pocEnv::$request["destination"]);
+    }
+    break;
+
+  case "delete": # delete pocs
+    pocError::fetch("PoC-Edit: delete");
+    foreach (pocEnv::$request["selection"] as $p) {
+      if ($p = poc::open($p))
+        $p->delete();
+    }
+    break;
+
+  case "new": # new poc
+    pocError::fetch("PoC-Edit: new");
+    if (!$thePoc = poc::open(pocEnv::$request["poc"]))
+      break;
+    $p = poc::open();
+    $p->title = pocEnv::$request["title"];
+    $p->content = pocEnv::$request["content"];
+    $p->mode = pocEnv::$request["mode"];
+    $p->insert("$thePoc->path/" . pocEnv::$request["name"]);
+    break;
+
+  case "chown": # chown
+    pocError::fetch("PoC-Edit: chown");
+    if (!$thePoc = poc::open(pocEnv::$request["poc"]))
+      break;    
+    $thePoc->chown(pocEnv::$request["user"], pocEnv::$request["group"], pocEnv::$request["recursive"]);
+    break;
+
+  case "chmod": # chmod
+    pocError::fetch("PoC-Edit: chmod");
+    if (!$thePoc = poc::open(pocEnv::$request["poc"])) {
+      pocError::create(404, "Not Found", "PoC-Edit/ajax chmod.");
+      break;
+    }
+    $thePoc->chmod(pocEnv::$request["userPrivs"], pocEnv::$request["groupPrivs"], pocEnv::$request["otherPrivs"], pocEnv::$request["recursive"]);
+    break;
+
+  default:
+    pocError::create(400, "Bad Request", "PoC-Edit/ajax action not found.");
+    break;
+
+}
+
+echo implode(PHP_EOL, pocError::fetchAll());
+
+?>
