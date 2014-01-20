@@ -16,6 +16,8 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
   # dependencies:
   #   uses pocEnv, poc, pocError
 
+  public $value = 0.0;
+
   protected $debitId = 0;
   protected $creditId = 0;
   protected $voucherId = 0;
@@ -31,14 +33,24 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
 
   public function __get($key) {
     switch ($key) {
-      case "get":
-        return self::format($this->content);
-      case "debit":
-        return poc::open($this->debitId);
       case "credit":
         return poc::open($this->creditId);
+      case "debit":
+        return poc::open($this->debitId);
       case "voucher":
         return poc::open($this->voucherId);
+      case "get":
+        return self::format($this->content);
+      case "runPriv":
+      case "openPriv":
+      case "selectPriv":
+      case "insertPriv":
+      case "updatePriv":
+      case "deletePriv":
+      case "userPrivs":
+      case "groupPrivs":
+      case "otherPrivs":
+        return $this->credit->$key;
       default:
         return parent::__get($key);
     }
@@ -76,6 +88,10 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
       return self::format($this->content);
   }
 
+  public function getInput() {
+    return pocTag::create("input", NULL, array("value" => self::format($this->content), "name" => $this->identifier));
+  }
+
   # db
   public function insert($poc) {
     if (is_a($poc, "poc"))
@@ -84,6 +100,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
       $this->creditId = $poc->id;
     else
       return;
+    $this->value = floatval($this->value);
     return parent::insert($this->name);
   }
 
@@ -104,7 +121,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
   protected static function getCreateParams() { return array("name" => "", "title" => "", "content" => "", "value" => 0.0); }
 
   # "abstract" static
-  protected static function getTableName() { return ""; }
+  public static function getTableName() { return ""; }
 
   # i/o
   public static function format($content, $format = NULL) { return $content; }
@@ -116,7 +133,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
 
 class pocAttributeChar extends pocAttribute {
 
-  protected static function getTableName() { return "pocAttributeChar"; }
+  public static function getTableName() { return "pocAttributeChar"; }
 
   protected static function getOpenProc() { return "pocAttributeCharOpen"; }
   protected static function getInsertProc() { return "pocAttributeCharInsert"; }
@@ -129,7 +146,7 @@ class pocAttributeChar extends pocAttribute {
 
 class pocAttributeDouble extends pocAttribute {
 
-  protected static function getTableName() { return "pocAttributeDouble"; }
+  public static function getTableName() { return "pocAttributeDouble"; }
 
   protected static function getOpenProc() { return "pocAttributeDoubleOpen"; }
   protected static function getInsertProc() { return "pocAttributeDoubleInsert"; }
@@ -137,6 +154,7 @@ class pocAttributeDouble extends pocAttribute {
   protected static function getDeleteProc() { return "pocAttributeDoubleDelete"; }
 
   public static function parse($content, $format = NULL) { return floatval($content); }
+  public static function format($content, $format = NULL) { return sprintf("%G", $content); }
 
 }
 
@@ -144,7 +162,7 @@ class pocAttributeDouble extends pocAttribute {
 
 class pocAttributeInt extends pocAttribute {
 
-  protected static function getTableName() { return "pocAttributeInt"; }
+  public static function getTableName() { return "pocAttributeInt"; }
 
   protected static function getOpenProc() { return "pocAttributeIntOpen"; }
   protected static function getInsertProc() { return "pocAttributeIntInsert"; }
@@ -159,7 +177,11 @@ class pocAttributeInt extends pocAttribute {
 
 class pocAttributeText extends pocAttribute {
 
-  protected static function getTableName() { return "pocAttributeText"; }
+  public function getInput() {
+    return pocTag::create("textarea", self::format($this->content), array("name" => $this->identifier), FALSE);
+  }
+
+  public static function getTableName() { return "pocAttributeText"; }
 
   protected static function getOpenProc() { return "pocAttributeTextOpen"; }
   protected static function getInsertProc() { return "pocAttributeTextInsert"; }

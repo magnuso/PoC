@@ -14,30 +14,33 @@ http://poc-online.net/license
 class pocNavi implements IteratorAggregate {
 
   public $path;
+  public $mode;
   public $ignore = false;
-  public $getTitle = true;
 
-  public function __construct($path = "") {
+  public function __construct($path = "", $mode = poc::NAVI_MODE) {
     $this->path = $path;
+    $this->mode = $mode;
   }
 
   public function getLinks() {
-    $array = array();
-    $poc = poc::open($this->path);
-    if ($poc->errCode || !$poc->selectPriv)
-      return $array;
+    $result = array();
     $u = new pocPath();
-    foreach($poc->select() as $row) {
-      if ($row["openPriv"] && ($this->ignore || ($row["mode"] & poc::NAVI_MODE))) {
-        $u->path = $poc->path . "/" . $row["name"];
-        $url = $u->url; # !
-        $a = new pocTag("a", $this->getTitle? $u->title: $u->name, array("href" => $url));
-        if ($u->here)
-          $a["class"] = "here";
-        $array[] = $a;
-      }
+    foreach (new pocSelect($this->path, "flat", $this->mode) as $p) {
+      $u->path = $p->path;
+      $params = array("href" => $u->url);
+      if ($u->here)
+        $params["class"] = "here";
+      $result[] = pocTag::create("a", $p->getTitle, $params);
     }
-    return $array;
+    return $result;
+  }
+
+  public function run($before = "", $after = "") {
+    echo $before;
+    foreach ($this->getLinks() as $a) {
+      $a->run();
+      echo $after;
+    }
   }
 
   # IteratorAggregate
@@ -50,82 +53,60 @@ class pocNavi implements IteratorAggregate {
 
 /******************************************************************************/
 
-class pocBreadcrumbs extends pocNavi {
+class pocNaviCrumb extends pocNavi {
 
   public function getLinks() {
-    $path = new pocPath($this->path);
-    if (!$path->path)
+    $result = array();
+    $u = new pocPath();
+    if (!$p = poc::open($this->path))
       return array();
-    $array = array();
-    foreach ($path as $u) {
-      if (!$poc = poc::open($u->path))
+    while ($p->id > 0) {
+      $u->path = $p->path;
+      if (!$this->mode || $p->mode & $this->mode)
+        $result[] = pocTag::create("a", $p->getTitle, array("href" => $u->url));
+      if (!$p = $p->parent)
         return array();
-      if ($this->ignore || $poc->navigatePriv) {
-        $url = $u->url; # !
-        $a = new pocTag("a", $poc->getTitle, array("href" => $url));
-        if ($u->here)
-          $a["class"] = "here";
-        $array[] = $a;
-      }
     }
-    return $array;
+    return array_reverse($result);
   }
 
 }
 
 /******************************************************************************/
 
-class pocStemNavi extends pocNavi {
-
-  private $aggregate;
-
-  private $styleLeft;
-  private $styleNumber;
-  private $styleRight;
-
-  public function __construct($path = "", $style = "position:relative;left:1em;") {
-    parent::__construct($path);
-    if ($style) {
-      $matches = array();
-      preg_match('/(^\D*)([\d\.]*)(\D*$)/', $style, $matches);
-      $this->styleLeft = $matches[1];
-      $this->styleNumber = $matches[2] + 0.0;
-      $this->styleRight = $matches[3];
-    } 
-  }
+class pocNaviStem extends pocNavi {
 
   public function getLinks() {
-    $this->aggregate = array();
-    $this->collect(explode("/", $this->path), array(), 0);
-    return $this->aggregate;
+    $result = array();
+    $u = new pocPath();
+    foreach (new pocSelect($this->path, "stem", $this->mode) as $p) {
+      $class = array(sprintf("node%02d", count(explode("/", $p->path))));
+      $u->path = $p->path;
+      if ($u->here)
+        $class[] = "here";
+      $result[] = pocTag::create("a", $p->getTitle, array("href" => $u->url, "class" => implode(" ", $class)));
+    }
+    return $result;
   }
 
-  private function collect($from, $to, $i) {
-    $poc = poc::open(implode("/", $to));
-    if ($poc->errCode || !$poc->selectPriv)
-      return false;
+}
+
+/******************************************************************************/
+
+class pocNaviTree extends pocNavi {
+
+  public function getLinks() {
+    $result = array();
     $u = new pocPath();
-    foreach($poc->select() as $row) {
-      if ($row["openPriv"]) {
-        $u->path = $poc->path . "/" . $row["name"];
-        $url = $u->url; # !
-        if ($this->ignore || $u->navigatePriv) {
-          $a = new pocTagA($this->getTitle? $u->title: $u->name, $url);
-          if ($u->here)
-            $a["class"] = "here";
-          if (!$u->navigatePriv)
-            $a["class"] = $a["class"]? $a["class"] . " noNavi": "noNavi";
-          if ($i && $this->styleNumber > 0.0)
-            $a["style"] = $this->styleLeft . ($this->styleNumber * $i) . $this->styleRight;
-          $this->aggregate[] = $a;
-        }
-        if ($u->here && count($from)) {
-          $to[] = array_shift($from);
-          $this->collect($from, $to, $i + (int)($this->ignore || $row["navigatePriv"]));
-        }
-      }
+    foreach (new pocSelect($this->path, "tree", $this->mode) as $p) {
+      $class = array(sprintf("node%02d", count(explode("/", $p->path))));
+      $u->path = $p->path;
+      if ($u->here)
+        $class[] = "here";
+      $result[] = pocTag::create("a", $p->getTitle, array("href" => $u->url, "class" => implode(" ", $class)));
     }
-  } 
+    return $result;
+  }
 
 }
 

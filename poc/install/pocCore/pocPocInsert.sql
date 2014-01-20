@@ -24,8 +24,7 @@ BEGIN
   bodyOfProc: BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
     --
-    CALL pocPocCreateTempTables;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
+    CALL pocTempTablesReset;
     --
     IF inId > 0 THEN
       SET path = pocPocPathFromId(inId);

@@ -99,6 +99,7 @@ class pocRecord extends pocRow {
 
   #
   protected function attributeAttach($attribute) { }
+  protected function attributeDetach($attribute) { }
 
   # public static
   public static function open($identifier = 0, $fresh = FALSE) {

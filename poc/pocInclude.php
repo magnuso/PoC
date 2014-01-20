@@ -21,6 +21,7 @@ include "pocRecord.php";
 include "poc.php";
 include "pocAttribute.php";
 include "pocNavi.php";
+include "pocSelect.php";
 include "pocPath.php";
 include "pocDir.php";
 include "pocRun.php";

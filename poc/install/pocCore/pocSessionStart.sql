@@ -60,6 +60,10 @@ BEGIN
     ELSE
       SET inMode = currentMode;
     END IF;
+    -- temporary tables
+    CREATE TEMPORARY TABLE pocTempSelect (id BIGINT, sel INT, hit INT, root INT, path TEXT);
+    CREATE TEMPORARY TABLE pocTempIds (tempId BIGINT, root BIGINT, path TEXT);
+    CREATE TEMPORARY TABLE pocTempWhere (whereClause TEXT, whereMode VARCHAR(16));
     -- finally
     SET t = UNIX_TIMESTAMP();
     UPDATE pocSession SET userId = @pocUserId, mode = inMode, modified = t WHERE id = @pocSessionId;

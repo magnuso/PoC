@@ -89,7 +89,7 @@ class pocWatch extends pocRow {
     }
   }
 
-  public function time($stop) {
+  public function time($stop = "") {
     $log = pocLog::create("$this->name stop", "", self::$level - 1);
     $time = $log->time - $this->lastTime;
     $log->content = sprintf("%.3f %s", $time, "$this->msg $stop");
@@ -181,16 +181,16 @@ class pocError extends pocRow {
 
 /******************************************************************************/
 
-class pocEchoSelect extends pocLog {
+class pocEcho extends pocLog {
 
   public function __construct($row = array()) {
     unset($row["className"]);
-    $newRow = array("name" => "pocEchoSelect", "content" => "", "level" => 0);
+    $newRow = array("name" => "pocEcho", "content" => "", "level" => 0);
     if ($row["name"]) {
       $newRow["name"] = $row["name"];
       unset($row["name"]);
     }
-    echo PHP_EOL . $newRow["name"] . PHP_EOL;
+    echo $newRow["name"] . PHP_EOL;
     foreach ($row as $k => $v) {
       $line = "  $k: $v" . PHP_EOL;
       echo $line;

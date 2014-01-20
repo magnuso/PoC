@@ -16,10 +16,6 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   # dependencies:
   #   pocEnv, pocPath
 
-  const SELECT_FLAT = 0;
-  const SELECT_DEEP = 1;
-  const SELECT_DUMMIES = 2;
-
   const NO_PRIV = 0;
   const RUN_PRIV = 1;
   const OPEN_PRIV = 2;
@@ -75,6 +71,8 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
         return poc::open($this->parentId);
       case "count":
         return self::$countSelect;
+      case "size":
+        return strlen($this->content);
       default:
         return parent::__get($key);
     }
@@ -142,7 +140,7 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   public function climb($attribute) {
     if (array_key_exists($attribute, $this->attributes))
       return $this->attributes[$attribute];
-    if ($parentId)
+    if ($this->parentId)
       return $this->parent->climb($attribute);
   }
 

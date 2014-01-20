@@ -44,6 +44,12 @@ function pocCheckDirty() {
       }
     )
   }
+  if (document.pocCKactive) {
+    if (CKEDITOR.instances.contentArea.checkDirty()) {
+      $( "#saveButton" ).prop("disabled", false);
+      document.pocIsDirty = true;
+    }
+  }
   return document.pocIsDirty;
 }
 
@@ -74,6 +80,10 @@ function pocSaveChanges() {
         $( document.pocPostData ).prop(this.name, $( this ).val());
     }
   )
+  if (document.pocCKactive) {
+    if (CKEDITOR.instances.contentArea.checkDirty())
+      document.pocPostData["<?PHP echo $thePoc->identifier; ?>"] = CKEDITOR.instances.contentArea.getData();
+  }
   $.post("<?PHP $u = new pocPath('./ajax'); echo $u->url; ?>", document.pocPostData,
     function(data) {
       if(data)
@@ -101,6 +111,33 @@ function pocDeletePocs() {
     selection: new Array()
   };
   $( ".selection:checked" ).each( function() { document.pocPostData.selection.push($( this ).val()); } );
+  $.post("<?PHP $u = new pocPath('./ajax'); echo $u->url; ?>", document.pocPostData,
+    function(data) {
+      if(data)
+        alert(data);
+      window.location.href = "<?PHP $u = new pocPath('.', array("poc" => $thePoc->path)); echo $u->url; ?>";
+    }
+  );
+}
+
+// onclick handler for delete attribute button (main form)
+
+function pocDeleteAttributes() {
+  if (document.pocIsDirty) {
+    if(confirm("Ungesicherte Änderungen!\nWollen Sie die Seite verlassen und die Änderungen verlieren?") == false)
+      return false;
+  }
+  $( "#overlay" ).show();
+  if(confirm("Wollen Sie die ausgewählten Attribute wirklich löschen?") == false) {
+    $( "#overlay" ).hide();
+    return false;
+  }
+  $( "html" ).css("cursor: wait");
+  document.pocPostData = {
+    action: "deleteAttributes",
+    selection: new Array()
+  };
+  $( ".selectionAttributes:checked" ).each( function() { document.pocPostData.selection.push($( this ).val()); } );
   $.post("<?PHP $u = new pocPath('./ajax'); echo $u->url; ?>", document.pocPostData,
     function(data) {
       if(data)
@@ -201,9 +238,7 @@ $( function() {
         this.pocCheckDirty = function() {
           return this.pocSaveContent != $( this ).val();
         };
-        this.onchange = function() {
-          pocCheckDirty();
-        };
+        this.onchange = function() { pocCheckDirty(); };
       }
     );
     pocCheckDirty();
@@ -218,6 +253,10 @@ $( function() {
         pocSaveChanges();
       }
     );
+    
+    // fix textarea
+    $( "#contentArea" ).width($( "#contentDiv" ).innerWidth());
+    $( "#contentArea" ).height($( "#contentDiv" ).innerHeight());
 
     // leave page
     window.onbeforeunload = function() {
@@ -225,30 +264,40 @@ $( function() {
         return "Ungesicherte Änderungen!\nWollen Sie die Seite verlassen?";
     };
 
+    window.onresize = function() {
+      if (document.pocCKactive) {
+        var o = $( "#contentDiv" );
+        CKEDITOR.instances.contentArea.resize(o.innerWidth(), o.innerHeight());
+      }
+    };
+
+document.pocCKactive = false;
 <?PHP
 
 # show errors
 
 foreach (pocError::fetchAll() as $error)
-  echo "window.alert('" . addslashes($error->brief()) . "');" . PHP_EOL;
+  echo "    window.alert('" . addslashes($error->brief()) . "');" . PHP_EOL;
 
 # init editor
 
 if (!$thePoc->content || (!strpos(" $thePoc->content", '<?PHP') && (strpos($thePoc->content, '</') || strpos($thePoc->content, '/>')))) {
-  echo "    CKEDITOR.replace( '$thePoc->identifier', {
+
+?>
+
+    var ck = CKEDITOR.replace( 'contentArea', {
         filebrowserBrowseUrl: 'poc.php/usr/bin/filemanager/CKEditor',
         filebrowserWindowWidth: '640',
         filebrowserWindowHeight: '480',
-        on: {
-          instanceReady: function( evt ) {
-            var editor = evt.editor;
-            editor.config.autoGrow_onStartup = true;
-            editor.on('saveSnapshot', function(e) { \$( '#$thePoc->identifier' ).val(editor.getData()); pocCheckDirty(); alert('123'); });
-          }
-        }
+        autoGrow_onStartup: 'true',
+        height: $( "#contentDiv" ).innerHeight() - 104
       }
     );
-    document.pocCKactive = true;";
+    CKEDITOR.instances.contentArea.on("change", function () { pocCheckDirty(); });
+    document.pocCKactive = true;
+
+<?PHP
+
 }
 
 ?>
@@ -376,6 +425,36 @@ if (!$thePoc->content || (!strpos(" $thePoc->content", '<?PHP') && (strpos($theP
             $( ".groupPriv:checked" ).each(function() { document.pocPostData.groupPrivs += parseInt($( this ).val()); } );
             $( ".otherPriv:checked" ).each(function() { document.pocPostData.otherPrivs += parseInt($( this ).val()); } );
             $( ".privsRecursive:checked" ).each(function() { document.pocPostData.recursive = 1; } );
+            $.post('<?PHP $u = new pocPath("./ajax"); echo $u->url; ?>', document.pocPostData).done( function(data) {
+                if (data)
+                  alert(data);
+                window.location.href = '<?PHP $u = new pocPath(".", array("poc" => $thePoc->path)); echo $u->url; ?>';
+              }
+            );
+          }
+        );
+      }
+    );
+
+    // init dialogNewAttribute
+    $( "#dialogNewAttribute" ).each( function () {
+        this.pocMount = function() {
+          $( "#newAttributeClassDiv" ).html( $( "#newAttributeClass" ).val() );
+        };
+        $( this ).find( "form" ).submit( function(event) {
+            event.preventDefault();
+            $( "html" ).css("cursor: wait");
+            document.pocPostData = {
+              action: 'newAttribute',
+              poc: '<?PHP echo $thePoc->path; ?>',
+              class: $( "#newAttributeClassDiv" ).html(),
+              name: $( "#newAttributeName" ).val(),
+              title: $( "#newAttributeTitle" ).val(),
+              content: $( "#newAttributeContent" ).val(),
+              debit: $( "#newAttributeDebit" ).val(),
+              voucher: $( "#newAttributeVoucher" ).val(),
+              value: $( "#newAttributeValue" ).val()
+            };
             $.post('<?PHP $u = new pocPath("./ajax"); echo $u->url; ?>', document.pocPostData).done( function(data) {
                 if (data)
                   alert(data);

@@ -17,6 +17,8 @@ class pocRun {
   const TEMPLATE_ATTRIBUTE_NAME = "_template";
   const ETC_INIT = "etc/init";
 
+  private static $theTemplate = NULL;
+
   # run
   # runs a single poc. don't call. use $poc->run(...) instead.
   #
@@ -101,10 +103,15 @@ class pocRun {
   }
 
   private static function runWithTemplate($poc) {
+    if (self::$theTemplate) {
+      $poc->run();
+      return;
+    }
     try {
       if ($template = $poc->climb(self::TEMPLATE_ATTRIBUTE_NAME)) {
         if ($template = $template->debit) {
           $watch = pocWatch::create("runWithTemplate");
+          self::$theTemplate = $template;
           $template->run($poc);
           $watch = NULL;
         } else {

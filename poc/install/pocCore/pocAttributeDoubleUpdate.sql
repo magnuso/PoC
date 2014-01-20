@@ -14,21 +14,27 @@ http://poc-online.net/license
 CREATE PROCEDURE pocAttributeDoubleUpdate (
     IN inId BIGINT,
     IN inDebitId BIGINT,
-    IN inCreditId BIGINT,
     IN inVoucherId BIGINT,
     IN inName VARCHAR(64),
     IN inTitle VARCHAR(64),
     IN inContent DOUBLE,
     IN inValue DOUBLE)
 BEGIN
-  DECLARE t BIGINT DEFAULT 0;
+  DECLARE n, creditId BIGINT DEFAULT 0;
   bodyOfProc: BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
+    -- get poc id
+    SELECT COUNT(id), creditId FROM pocAttributeDouble WHERE id = inId INTO n, creditId;
     -- check
-    IF pocPocPathFromId(inCreditId) IS NULL THEN
+    IF n < 0 THEN
       SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeDoubleUpdate' AS content;
       LEAVE bodyOfProc;
     END IF;
-    IF NOT pocPocCheckPriv(inCreditId, 'update') THEN
+    IF pocPocPathFromId(creditId) IS NULL THEN
+      SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeDoubleUpdate' AS content;
+      LEAVE bodyOfProc;
+    END IF;
+    IF NOT pocPocCheckPriv(creditId, 'update') THEN
       SELECT 401 AS id, 'Unauthorized' AS name, 'pocAttributeDoubleUpdate' AS content;
       LEAVE bodyOfProc;
     END IF;
@@ -41,21 +47,22 @@ BEGIN
       LEAVE bodyOfProc;
     END IF;
     -- finally
-    SET t = UNIX_TIMESTAMP();
-    UPDATE pocAttributeDouble SET creditId = inCreditId, debitId = inDebitId, voucherId = inVoucherId, 
-      modified = t, modifiedById = @pocUserId, name = inName, title = inTitle, content = inContent, value = inValue
+    UPDATE pocAttributeDouble SET debitId = inDebitId, voucherId = inVoucherId,
+      modified = UNIX_TIMESTAMP(), modifiedById = @pocUserId, name = inName, title = inTitle, content = inContent, value = inValue
       WHERE id = inId;
     -- output
-    SELECT 1 AS updateFlag, ta.*, tu.userId, tu.name AS userName, @pocUserName AS createdByName, @pocUserName AS modifiedByName, tp.userPrivs, tp.groupPrivs, tp.otherPrivs, 
+    SELECT 1 AS updateFlag, ta.*, tuc.name AS createdByName, tum.name AS modifiedByName, tp.userPrivs + 0, tp.groupPrivs + 0, tp.otherPrivs + 0,
         (@pocAdmin OR FIND_IN_SET('run', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('run', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('run', tp.groupPrivs))) + 0 AS runPriv,
         1 AS openPriv,
         (@pocAdmin OR FIND_IN_SET('select', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('select', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('select', tp.groupPrivs))) + 0 AS selectPriv,
         (@pocAdmin OR FIND_IN_SET('insert', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('insert', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('insert', tp.groupPrivs))) + 0 AS insertPriv,
         (@pocAdmin OR FIND_IN_SET('update', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('update', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('update', tp.groupPrivs))) + 0 AS updatePriv,
-        (@pocAdmin OR FIND_IN_SET('delete', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('delete', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('delete', tp.groupPrivs))) + 0AS deletePriv
+        (@pocAdmin OR FIND_IN_SET('delete', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('delete', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('delete', tp.groupPrivs))) + 0 AS deletePriv
       FROM pocAttributeDouble AS ta
       LEFT JOIN pocPoc AS tp ON tp.id = ta.creditId
-      LEFT JOIN pocUser AS tu ON tu.id = tp.userId
+      LEFT JOIN pocUser AS tuc ON tuc.id = ta.createdById
+      LEFT JOIN pocUser AS tum ON tum.id = ta.modifiedById
+      LEFT JOIN pocUser2Group AS tu2g ON tu2g.groupId = tp.groupId
       WHERE ta.id = inId;
   END bodyOfProc;
 END;

@@ -207,12 +207,12 @@ foreach ($thePoc->select(1, 0) as $p) {
 
       <table cellspacing="0">
         <tr>
-          <th width="15%"><div class="spacer24">&nbsp;</div>Name</th>
+          <th width="20%"><div class="spacer24">&nbsp;</div> Name</th>
           <th width="20%">Titel</th>
           <th width="10%">Inhalt</th>
           <th width="10%">Soll</th>
           <th width="10%">Haben</th>
-          <th width="5%">Wert</th>
+          <th width="10%">Wert</th>
           <th width="10%">geändert</th>
           <th width="10%">von</th>
         <tr>
@@ -220,17 +220,20 @@ foreach ($thePoc->select(1, 0) as $p) {
 
 $u = new pocPath('./attribute');
 foreach ($thePoc as $attribute) {
+  $u['attribute'] = $attribute->identifier;
+  $n = pocTag::create("a", $attribute->name, array("href" => $u->url));
+  $t = pocTag::create("a", $attribute->title, array("href" => $u->url));
   $i = $attribute->getInput();
   $i["class"] = "pocInput mainInput";
 ?>
         <tr>
           <td><div class="spacer24"><input type="checkbox" class="mainInput selectionAttributes" name="selectionAttributes[]" value="<?PHP echo $attribute->identifier; ?>" /></div>
-            <input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:name" value="<?PHP pocEnv::echoHtml($attribute->name); ?>" /></td>
-          <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:title" value="<?PHP pocEnv::echoHtml($attribute->title); ?>" /></td>
+            <?PHP $n->run(); ?></td>
+          <td><?PHP $t->run(); ?></td>
           <td><?PHP $i->run(); ?></td>
-          <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:debit" value="<?PHP if ($p = $attribute->debit) echo $p->path; ?>" /></td>
-          <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:voucher" value="<?PHP if ($p = $attribute->voucher) echo $p->path; ?>" /></td>
-          <td><input class="pocInput mainInput rightText" name="<?PHP echo $attribute->identifier; ?>:value" value="<?PHP printf("%G", $attribute->value); ?>" /></td>
+          <td><?PHP if ($p = $attribute->debit) echo $p->path; ?></td>
+          <td><?PHP if ($p = $attribute->voucher) echo $p->path; ?></td>
+          <td class="rightText"><?PHP printf("%G", $attribute->value); ?></td>
           <td><?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $p->modified); ?></td>
           <td><?PHP pocEnv::echoHtml($attribute->modifiedByName); ?></td>
         <tr>

@@ -18,7 +18,7 @@ interface IPocRow { }
 class pocRow implements IPocRow {
 
   protected $id = 0;
-  protected $className = "";
+#  protected $className = "";
 
   public $name = "";
   public $title = "";
@@ -33,6 +33,8 @@ class pocRow implements IPocRow {
 
   public function __get($key) {
     switch ($key) {
+      case "className":
+        return get_class($this);
       case "getTitle":
         return $this->title ? $this->title : $this->name;
       default:
@@ -63,8 +65,11 @@ class pocRow implements IPocRow {
     $class = get_called_class();
     $params = func_get_args();
     $row = array();
-    foreach ($class::getCreateParams() as $k => $v)
-      $row[$k] = isset($params[0]) ? array_shift($params) : $v;
+    $i = 0;
+    foreach ($class::getCreateParams() as $k => $v) {
+      $row[$k] = isset($params[$i]) ? $params[$i] : $v;
+      $i++;
+    }
     return new $class($row);
   }
 
@@ -82,6 +87,7 @@ class pocResult extends pocRow implements ArrayAccess, IteratorAggregate {
   protected $row;
 
   public function __construct($row = array()) {
+    unset($row["className"]);
     $this->row = $row;
   }
 

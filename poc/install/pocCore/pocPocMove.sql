@@ -18,11 +18,9 @@ BEGIN
   DECLARE n INT DEFAULT 0;
   DECLARE path TEXT;
   bodyOfProc: BEGIN
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempIds (tempId BIGINT, path TEXT);
-    DELETE FROM pocTempSelect;
-    DELETE FROM pocTempIds;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocMove' AS content;
+    --
+    CALL pocTempTablesReset;
     -- check
     IF inId = 0 THEN
       SELECT 406 AS id, 'Not Acceptable' AS name, 'pocPocMove' AS content;
@@ -72,23 +70,11 @@ BEGIN
     UPDATE pocPoc SET parentId = toId, modified = UNIX_TIMESTAMP(), modifiedById = @PocUserId WHERE id = inId;
     -- output
     CREATE TEMPORARY TABLE IF NOT EXISTS pocTempPath (id BIGINT, path TEXT);
-    DELETE FROM pocTempPath;
+    DELETE FROM pocTempPath WHERE id IN (SELECT id FROM pocTempSelect);
     SET path = pocPocPathFromId(inId);
-    SELECT 'poc' AS className, 1 AS updateFlag, tp.*, path,
-        (@pocAdmin OR FIND_IN_SET('run', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('run', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('run', tp.groupPrivs))) + 0 AS runPriv,
-        1 AS openPriv,
-        (@pocAdmin OR FIND_IN_SET('select', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('select', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('select', tp.groupPrivs))) + 0 AS selectPriv,
-        (@pocAdmin OR FIND_IN_SET('insert', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('insert', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('insert', tp.groupPrivs))) + 0 AS insertPriv,
-        (@pocAdmin OR FIND_IN_SET('update', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('update', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('update', tp.groupPrivs))) + 0 AS updatePriv,
-        (@pocAdmin OR FIND_IN_SET('delete', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('delete', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('delete', tp.groupPrivs))) + 0AS deletePriv,
-        tu.name AS userName, tg.name AS groupName, tuc.name AS createdByName, tum.name AS modifiedByName
-      FROM pocPoc AS tp
-      LEFT JOIN pocUser2Group AS tu2g ON tu2g.groupId = tp.groupId AND tu2g.userId = @pocUserId
-      LEFT JOIN pocUser AS tu ON tu.id = tp.userId
-      LEFT JOIN pocGroup AS tg ON tg.id = tp.groupId
-      LEFT JOIN pocUser AS tuc ON tuc.id = tp.createdById
-      LEFT JOIN pocUser AS tum ON tum.id = tp.modifiedById
-      WHERE tp.id = inId;
+    DELETE FROM pocTempSelect;
+    INSERT INTO pocTempSelect (id, hit) VALUES (inId, 1);
+    CALL pocPocCreatePocs;
   END bodyOfProc;
   DELETE FROM pocTempSelect;
 END;

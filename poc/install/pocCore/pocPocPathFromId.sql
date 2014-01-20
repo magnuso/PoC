@@ -37,32 +37,31 @@ BEGIN
     RETURN NULL;
   END IF;
   pathLoop: LOOP
-    IF parentId > 0 THEN
-      SELECT COUNT(tt.id), tp.parentId, tp.name, tt.path,
-          @pocAdmin OR FIND_IN_SET('open', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('open', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('open', tp.groupPrivs))
-        FROM pocPoc AS tp
-        LEFT JOIN pocUser2Group AS tu2g ON tu2g.groupId = tp.groupId AND tu2g.userId = @pocUserId
-        LEFT JOIN pocTempPath AS tt ON tt.id = inId
-        WHERE tp.id = parentId
-        INTO n, parentId, name, cache, priv;
-      IF priv IS NULL THEN
-        INSERT INTO pocTempPath (id, path) VALUES (inId, NULL);
-        RETURN NULL;
-      END IF;
-      IF n = 1 THEN
-        IF cache IS NULL THEN
-          INSERT INTO pocTempPath (id, path) VALUES (inId, NULL);
-          RETURN NULL;
-        ELSE
-          SET path = CONCAT(cache, '/', path);
-          INSERT INTO pocTempPath (id, path) VALUES (inId, path);
-          RETURN path;
-        END IF;
-      END IF;
-      SELECT CONCAT(name, '/', path) INTO path;
-    ELSE
+    IF parentId < 1 THEN
       LEAVE pathLoop;
     END IF;
+    SELECT COUNT(tt.id), tp.parentId, tp.name, tt.path,
+        @pocAdmin OR FIND_IN_SET('open', tp.otherPrivs) OR (@pocUserId = tp.userId AND FIND_IN_SET('open', tp.userPrivs)) OR (tu2g.groupId AND FIND_IN_SET('open', tp.groupPrivs))
+      FROM pocPoc AS tp
+      LEFT JOIN pocUser2Group AS tu2g ON tu2g.groupId = tp.groupId AND tu2g.userId = @pocUserId
+      LEFT JOIN pocTempPath AS tt ON tt.id = inId
+      WHERE tp.id = parentId
+      INTO n, parentId, name, cache, priv;
+    IF priv IS NULL THEN
+      INSERT INTO pocTempPath (id, path) VALUES (inId, NULL);
+      RETURN NULL;
+    END IF;
+    IF n = 1 THEN
+      IF cache IS NULL THEN
+        INSERT INTO pocTempPath (id, path) VALUES (inId, NULL);
+        RETURN NULL;
+      ELSE
+        SET path = CONCAT(cache, '/', path);
+        INSERT INTO pocTempPath (id, path) VALUES (inId, path);
+        RETURN path;
+      END IF;
+    END IF;
+    SELECT CONCAT(name, '/', path) INTO path;
   END LOOP;
   INSERT INTO pocTempPath (id, path) VALUES (inId, path);
   RETURN path;

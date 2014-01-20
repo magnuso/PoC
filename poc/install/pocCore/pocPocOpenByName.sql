@@ -17,10 +17,10 @@ CREATE PROCEDURE pocPocOpenByName (
 BEGIN
   DECLARE n INT DEFAULT 0;
   DECLARE path TEXT DEFAULT '';
-  CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
   bodyOfProc: BEGIN
-    DELETE FROM pocTempSelect;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocOpenByName' AS content;
+    --
+    CALL pocTempTablesReset;
     --
     SELECT COUNT(id), id FROM pocPoc WHERE parentId = inId AND name = inName INTO n, inId;
     IF n < 1 THEN

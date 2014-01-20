@@ -22,12 +22,9 @@ CREATE PROCEDURE pocAttributeIntUpdate (
 BEGIN
   DECLARE n, creditId BIGINT DEFAULT 0;
   bodyOfProc: BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-      BEGIN
-        SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
-      END;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocInsert' AS content;
     -- get poc id
-    SELECT COUNT(ta.id), ta.creditId FROM pocAttributeInt as ta WHERE id = inId INTO n, creditId;
+    SELECT COUNT(id), creditId FROM pocAttributeInt WHERE id = inId INTO n, creditId;
     -- check
     IF n < 0 THEN
       SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeIntUpdate' AS content;

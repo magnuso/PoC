@@ -11,11 +11,11 @@ http://poc-online.net/license
 
 *******************************************************************************/
 
-CREATE PROCEDURE pocPocFreeSelect ()
+CREATE PROCEDURE pocTempTablesReset ()
 BEGIN
-  bodyOfProc: BEGIN
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
-    DELETE FROM pocTempSelect;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
-  END bodyOfProc;
+  DELETE FROM pocTempSelect;
+  DELETE FROM pocTempIds;
+  DELETE FROM pocTempWhere;
+  SET @pocSelectJoinClause = '', @pocSelectOrderBy = '', @pocSelectGroupBy = '', @pocSelectColumns = '';
+  SELECT 'pocCountSelect' AS className, 0 AS count;
 END;

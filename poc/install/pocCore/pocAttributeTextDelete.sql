@@ -32,6 +32,6 @@ BEGIN
       LEAVE bodyOfProc;
     END IF;
     -- finally
-    DELETE FROM pocAttributeTextDelete WHERE id = inId;
+    DELETE FROM pocAttributeText WHERE id = inId;
   END bodyOfProc;
 END;

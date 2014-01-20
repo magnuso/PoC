@@ -46,7 +46,7 @@ class pocPath implements ArrayAccess, IteratorAggregate {
       case "url":
         return self::urlCulator($this->myPath, $this->params, $this->ancor, $this->target);
       case "here":
-        return strpos("/" . pocEnv::$env["PATH_INFO"] . "/", "/$this->myPath/") == 1;
+        return strpos("/" . pocEnv::$env["PATH_INFO"] . "/", "/$this->myPath/") === 0;
     }
   }
 

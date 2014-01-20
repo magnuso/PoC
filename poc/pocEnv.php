@@ -75,7 +75,9 @@ class pocEnv extends pocRow {
       pocError::create(400, "Bad Request", "Fetch Errors before DB-Call");
       return array();
     }
-    $call = "CALL $procedure(" . implode(",", array_fill(0, count($args), "?")) . ")";
+    $call = "CALL $procedure";
+    if ($n = count($args))
+      $call .= "(" . implode(",", array_fill(0, $n, "?")) . ")";
     pocError::mark($call);
     $watch = pocWatch::create("call", $call);
     try {
@@ -125,7 +127,7 @@ class pocEnv extends pocRow {
     return pocError::hasError() ? array() : $result;
   }
 
-  protected static function quote($string) {
+  public static function quote($string) {
     return self::$dbh->quote($string);
   }
 

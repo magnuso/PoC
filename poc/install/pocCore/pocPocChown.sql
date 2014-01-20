@@ -20,16 +20,9 @@ BEGIN
   DECLARE inUserId, inGroupId BIGINT DEFAULT 0;
   DECLARE n, priv, mode INT DEFAULT 0;
   bodyOfProc: BEGIN
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-      BEGIN
-        SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocChown' AS content;
-      END;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocChown' AS content;
     --
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempIds (tempId BIGINT, path TEXT);
-    DELETE FROM pocTempSelect;
-    DELETE FROM pocTempIds;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
+    CALL pocTempTablesReset;
     -- check
     IF inId = 0 THEN
       SELECT 406 AS id, 'Not Acceptable' AS name, 'pocPocChown' AS content;

@@ -19,16 +19,20 @@ a:active { color: #f00; }
 
 .functionBar { position: absolute; top: 16px; left: 16px; }
 .tableDiv { position: absolute; top: 48px; right: 16px; bottom: 16px; left: 16px; overflow: auto; }
-#contentDiv textarea { position: absolute; top: 0px; right: 0px; bottom: 0px; left: 0px; }
+#contentDiv textarea { position: relative; top: 0px; right: 0px; bottom: 0px; left: 0px; }
 
 a:link.tabButton, a:visited.tabButton { display: inline-block; min-width: 112px; height: 24px; margin-left: 16px; padding: 4px 8px 3px 8px; border: 1px solid black; text-align: center; text-decoration: none; font-weight: bold; color: black; background: #ccc; }
 a:link.tabButton.here, a:visited.tabButton.here { background: white; border-bottom: 1px solid white; }
 
 .tableDiv table { width: 100%; white-space: nowrap; }
-.tableDiv td, .tableDiv th { height: 24px; padding: 0px 14px 0px 2px; text-align: left; }
+.tableDiv td, .tableDiv th { height: 24px; padding: 0px 14px 0px 2px; text-align: left; vertical-align: top; }
 .tableDiv th { background: #ccc; }
-.tableDiv td.rightText, .tableDiv th.rightText { text-align: right; }
+.tableDiv td.rightText, .tableDiv th.rightText input.rightText { text-align: right; }
 .tableDiv tr:hover { background: #ddd; }
+.tableDiv input { border: none; margin: 0px auto; padding: 0px; width: auto; background: none; font: 100.01%/141.42% Arial, "Helvetica Neue", Helvetica, sans-serif; }
+.tableDiv input.changed { background-color: #fcc; }
+.tableDiv textarea { border: none; margin: 0px auto; padding: 0px; width: auto; background: none; }
+.tableDiv textarea.changed { background-color: #fcc; }
 
 .floatBox { display: inline; float: left; margin-left: 8px; margin-bottom: 8px; }
 .spacer24 { display: inline; float: left; width: 24px; }

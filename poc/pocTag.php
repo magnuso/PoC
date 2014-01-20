@@ -20,10 +20,6 @@ class pocTag extends pocArray implements ArrayAccess {
   protected $intro;
   protected $outro;
 
-  public function __construct($row) {
-    parent::__construct($row);
-  }
-
   public function run() {
     echo $this->__toString();
   }
@@ -39,7 +35,7 @@ class pocTag extends pocArray implements ArrayAccess {
       return $out . " />$tag[3]";
     $out .= ">";
     foreach($this as $content)
-      $out .= is_a($content, __CLASS__) ? $content->__toString() : ($this->isHtml ? $content : pocEnv::isHtml($content));
+      $out .= is_a($content, __CLASS__) ? $content->__toString() : ($this->isHtml ? $content : pocEnv::html($content));
     return "$out$tag[3]</$tag[2]>";
   }
 

@@ -16,10 +16,10 @@ CREATE PROCEDURE pocPocOpenById (
 BEGIN
   DECLARE n BIGINT DEFAULT 0;
   DECLARE path TEXT DEFAULT '';
-  CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
   bodyOfProc: BEGIN
-    DELETE FROM pocTempSelect;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocOpenByName' AS content;
+    --
+    CALL pocTempTablesReset;
     --
     IF inId > 0 THEN
       SET path = pocPocPathFromId(inId);

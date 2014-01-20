@@ -17,11 +17,9 @@ BEGIN
   DECLARE n INT DEFAULT 0;
   DECLARE path TEXT DEFAULT '';
   bodyOfProc: BEGIN
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempSelect (id BIGINT, sel INT, hit INT, path TEXT);
-    CREATE TEMPORARY TABLE IF NOT EXISTS pocTempIds (tempId BIGINT, path TEXT);
-    DELETE FROM pocTempSelect;
-    DELETE FROM pocTempIds;
-    SELECT 'pocCountSelect' AS className, 0 AS count;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 400 AS id, 'SQLEXCEPTION' AS name, 'pocPocOpenByName' AS content;
+    --
+    CALL pocTempTablesReset;
     -- check
     IF inId = 0 THEN
       SELECT 403 AS id, 'Forbidden' AS name, 'pocPocDelete' AS content;
