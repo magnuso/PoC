@@ -232,14 +232,9 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
   # also creates in the db a temporary table of results for subsequent finds.
   # ATTENTION! the temporary table can't be nested. subsequent finds work on any poc.
   #
-  public function select() {
-    pocError::fetch("poc->selectTree($this->path)");
-    $args = func_get_args();
-    $resultMode = count($args) ? array_shift($args) : SELECT_DEFAULT_RESULT_MODE;
-    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_POC_MODE;
-    $nameLike = count($args) ? array_shift($args) : "%";
-    $contentLike = count($args) ? array_shift($args) : "%";
-    return pocEnv::call("pocPocSelect", array($this->id, $resultMode, $pocMode, $nameLike, $contentLike));
+  public function select($selectMode = "flat", $pocMode = poc::NO_MODE, $nameLike = "", $contentLike = "") {
+    pocError::fetch("poc->select($this->path)");
+    return new pocSelect($this, $selectMode, $pocMode, $nameLike, $contentLike);
   }
 
   public function selectTree() {

@@ -1,5 +1,22 @@
 <?PHP
 
+/*******************************************************************************
+
+PoC Web-Application-Framwork
+http://poc-online.net/
+
+Copyright (c) 2013, PoC - Marcus Grundschok
+Released under the MIT license
+http://poc-online.net/license
+
+-- pocPackage: pocCore
+-- pocPath: usr/bin/edit/ajax
+-- pocUser: admin
+-- pocGroup: user
+-- pocPrivileges: rosiud ros--- ------
+
+*******************************************************************************/
+
 pocEnv::header();
 
 try {
