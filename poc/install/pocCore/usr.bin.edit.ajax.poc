@@ -54,7 +54,7 @@ try {
       }
       $pp->run();
       $table = pocTag::create("  table  " . PHP_EOL, NULL, array("cellspacing" => 0, "width" => "100%"));
-      foreach ($thePoc->select(1, 0) as $p) {
+      foreach ($thePoc->select() as $p) {
         $tr = pocTag::create("    tr    " . PHP_EOL);
         $tr->push(pocTag::create("      td      " . PHP_EOL, pocTag::create("a", $p->name, array("href" => "#", "title" => $p->path)), array("width" => "80%")));
         $tr->push(pocTag::create("      td      " . PHP_EOL, pocTag::create("a", $p->title, array("href" => "#", "title" => $p->path))));

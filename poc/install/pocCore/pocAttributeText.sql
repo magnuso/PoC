@@ -27,5 +27,7 @@ CREATE TABLE pocAttributeText (
   value DOUBLE NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (creditId) REFERENCES pocPoc(id) ON DELETE CASCADE,
+  FOREIGN KEY (debitId) REFERENCES pocPoc(id) ON DELETE SET NULL,
+  FOREIGN KEY (voucherId) REFERENCES pocPoc(id) ON DELETE SET NULL
   INDEX (creditId, name)
 ) ENGINE InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
