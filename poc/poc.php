@@ -163,6 +163,15 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
       pocError::create(403, "Forbidden");
   }
 
+  public function display() {
+    if ($this->updatePriv && preg_match('/<\w/', $this->content) && !preg_match('/<\?/', $this->content)) {
+      $div = pocTag::create("div", $this->content, array("class" => "pocEditDiv", "id" => $this->identifier, "contenteditable" => "TRUE"));
+      $div->run();
+    } else {
+      $this->run();
+    }
+  }
+
   # db
   public function insert($path) {
     $path = new pocPath($path);
@@ -175,9 +184,10 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
       return NULL;
     }
     $this->parentId = $parent->id;
-    if ($newPoc = parent::insert($path->name))
+    if ($newPoc = parent::insert($path->name)) {
       foreach ($this as $attribute)
         $attribute->insert($newPoc);
+    }
     return $newPoc;
   }
 
@@ -230,56 +240,11 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   # select($resultClass, $pocMode, $nameLike, $contentLike, );
   # also creates in the db a temporary table of results for subsequent finds.
-  # ATTENTION! the temporary table can't be nested. subsequent finds work on any poc.
+  # ATTENTION! the temporary table can't be nested.
   #
   public function select($selectMode = "flat", $pocMode = poc::NO_MODE, $nameLike = "", $contentLike = "") {
     pocError::fetch("poc->select($this->path)");
     return new pocSelect($this, $selectMode, $pocMode, $nameLike, $contentLike);
-  }
-
-  public function selectTree() {
-    pocError::fetch("poc->selectTree($this->path)");
-    $args = func_get_args();
-    $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
-    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
-    $nameLike = count($args) ? array_shift($args) : "%";
-    $contentLike = count($args) ? array_shift($args) : "%";
-    return pocEnv::call("pocPocSelectTree", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
-  }
-
-  public function selectStem() {
-    pocError::fetch("poc->selectTree($this->path)");
-    $args = func_get_args();
-    $resultClass = count($args) ? array_shift($args) : SELECT_DEFAULT_CLASS;
-    $pocMode = count($args) ? array_shift($args) : SELECT_DEFAULT_MODE;
-    $nameLike = count($args) ? array_shift($args) : "%";
-    $contentLike = count($args) ? array_shift($args) : "%";
-    return pocEnv::call("pocPocSelectStem", array($this->id, $resultClass, $pocMode, $nameLike, $contentLike));
-  }
-
-  # find($resultClass, $findAttribute, $FindNextAttribute, ...);
-  # finds in results of previous select.
-  #
-  public function find() {
-    pocError::fetch("poc->find($this->path)");
-    $args = func_get_args();
-    $resultMode = array_shift($args);
-    $symbols = array();
-    $selects = array();
-    $joins = array();
-    $groups = array();
-    $where = array();
-    foreach ($args as $arg) {
-#      if (preg_match('/^(\w+)\s*\(\s*(.*)\)$/', $arg, $line))
-#      if (preg_match('/^(\w+)\s+(.*)/', $arg, $line))
-#      $symbols[]
-    }
-    return pocEnv::call("pocPocFind", array($this->id, $resultMode, $join, $where, $group, $order, $offset, $count));
-  }
-
-  public function freeSelect() {
-    pocError::fetch(__CLASS__ . "::" . __METHOD__ . "($this->id)");
-    return pocEnv::call("pocPocFreeSelect");
   }
 
   # manage attributes-cache
@@ -341,6 +306,8 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   protected static function getInsertParams() { return array("parentId", "name", "title", "content", "mode"); }
   protected static function getUpdateParams() { return array("id", "name", "title", "content", "mode"); }
+
+  public static function getTableName() { return "pocPoc"; }
 
   # create params
   protected static function getCreateParams() {

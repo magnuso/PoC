@@ -106,7 +106,7 @@ function pocSaveChanges() {
     function(data) {
       if(data)
         alert(data);
-      window.location.href = "<?PHP $u = new pocPath('.', array("poc" => $thePoc->path)); echo $u->url; ?>";
+      window.location.href = "<?PHP $u = new pocPath('.', array("poc" => $thePoc->id)); echo $u->url; ?>";
     }
   );
 }
@@ -224,6 +224,17 @@ function pocHideLog() {
   return false;
 }
 
+// imgage mamager
+
+function launchImg() {
+  var url = "<?PHP $u = new pocPath("usr/bin/filemanager/CKEditor"); echo $u->url; ?>";
+  var left = Math.floor((screen.width - 640) / 2);
+  var top = Math.floor((screen.height - 480) / 2);
+  var launch = window.open(url, "PoC-Image", "width=640,height=480,left=" + left + ",top=" + top + "resizable=yes,scrollbars=yes");
+  launch.focus();
+  return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // on load
@@ -304,6 +315,7 @@ if (!$thePoc->content || (!strpos(" $thePoc->content", '<?PHP') && (strpos($theP
 ?>
 
     var ck = CKEDITOR.replace( 'contentArea', {
+        extraAllowedContent: 'iframe [*]',
         filebrowserBrowseUrl: 'poc.php/usr/bin/filemanager/CKEditor',
         filebrowserWindowWidth: '640',
         filebrowserWindowHeight: '480',
@@ -515,4 +527,3 @@ function pocAjaxSelect(container, pocPath) {
     }
   );
 }
-

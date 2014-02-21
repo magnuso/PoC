@@ -60,6 +60,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
     switch ($key) {
       case "set":
         $this->content = self::parse($value);
+        $this->update();
         break;
       case "debit":
         if (is_a($value, "poc"))
@@ -68,6 +69,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
           $this->debitId = $poc->id;
         else
           $this->debitId = 0;
+        $this->update();
         break;
       case "voucher":
         if (is_a($value, "poc"))
@@ -76,6 +78,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
           $this->voucherId = $poc->id;
         else
           $this->voucherId = 0;
+        $this->update();
         break;
       default:
         parent::__set($key, $value);
@@ -119,9 +122,6 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
   protected static function getInsertParams() { return array("className", "debitId", "creditId", "voucherId", "name", "title", "content", "value"); }
   protected static function getUpdateParams() { return array("id", "debitId", "voucherId", "name", "title", "content", "value"); }
   protected static function getCreateParams() { return array("name" => "", "title" => "", "content" => "", "value" => 0.0); }
-
-  # "abstract" static
-  public static function getTableName() { return ""; }
 
   # i/o
   public static function format($content, $format = NULL) { return $content; }

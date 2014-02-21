@@ -117,6 +117,7 @@ if ($dbhOk && $includeOk && $configOk && !$userOk && $_REQUEST['installPoc']) {
       $_SESSION['username'] = '';
       $mistakes++;
   }
+echo "Mistakes: $mistakes.";
   if ($mistakes == 0) {
     foreach (pocPackage::$packages as $p)
       $p->install();

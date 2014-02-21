@@ -138,56 +138,90 @@ class pocSelectJoin {
 
   private $as = "";
   private $asContent = "";
+  private $className = "";
 
-#                 __construct("poc", $pocSelectJoin, $name, $whereMode = "AND") {
+  # e.g.
+  #
+  # new pocSelectJoin("pocAttributeChar", "keyword");
+  # new pocSelectJoin("pocAttributeChar", "keyword", "hallo");
+  # new pocSelectJoin("pocAttributeDouble", "price", "\$ > 5.0");
+  # new pocSelectJoin("pocAttributeDouble.both", "record");
+  #
+  # $2page = new pocSelectJoin("pocAttributeInt", "page", "www/home/shop");
+  # $page = new pocSelectJoin("poc", "$2page");
+  #
   public function __construct($class, $name, $where = "", $whereMode = "AND") {
     pocError::fetch("pocSelectJoin->__construct($class...)");
     $this->as = self::DEFAULT_AS . self::$number++;
     $this->asContent = "$this->as.content";
-    list($join, $class) = explode(" ", $class);
-    if (!$class) {
-      $class = $join;
-      $join = "$this->asContent IS NOT NULL";
-    } else {
-      $join = "";
-    }
-    list($class, $on) = explode(".", $class);
-    try {
-      $table = $class::getTableName();
-    } catch (Exception $e) {
-      pocError::create(400, "Bad Request", "Can't join class '$class'.");
-      return NULL;
-    }
-    #
-    switch ($on) {
-      case "";
-        $on = "creditId";
-        break;
-      case "creditId";
-      case "debitId";
-      case "voucherId";
-        break;
-      case "both";
-        $on = "creditId = poc.id OR $this->as.debitId";
-        break;
-      default;
-        pocError::create(400, "Bad Request", "Unknown field '$on'.");
+    if ($class == "poc") {
+      list($on, $name) = explode(".", str_replace(".content", "", $name));
+      switch ($name) {
+        case "":
+          $on .= ".debitId";
+          break;
+        case "debitId":
+        case "creditId":
+        case "voucherId":
+          $on .= ".$name";
+          break;
+        default:
+          pocError::create(400, "Bad Request", "Can't find column '$name'.");
+          return NULL;
+          break;
+      }
+      if (pocError::hasError())
         return NULL;
-    }
-    #
-    if (!preg_match('/^[\w\d]+$/', $name)) {
-      pocError::create(400, "Bad Request", "Bad attribute name '$name'.");
-      return NULL;
-    }
-    #
-    if ($join)
-      $this->where($join);
-    if ($where)
+      $this->className = "poc";
       $this->where($where, $whereMode);
-    #
-    if (pocError::hasError())
-      return NULL;
-    pocEnv::call("pocSelectInsertJoin", array($table, $this->as, $on, $class, $name));
+      pocEnv::call("pocSelectInsertJoinPoc", array($this->as, $on));
+    } else {
+      list($join, $class) = explode(" ", $class);
+      if (!$class) {
+        $class = $join;
+        $join = "$this->asContent IS NOT NULL";
+      } else {
+        $join = "";
+      }
+      list($class, $on) = explode(".", $class);
+      try {
+        $table = $class::getTableName();
+      } catch (Exception $e) {
+        pocError::create(400, "Bad Request", "Can't join class '$class'.");
+        return NULL;
+      }
+      #
+      switch ($on) {
+        case "";
+          $on = "creditId";
+          break;
+        case "creditId";
+        case "debitId";
+        case "voucherId";
+          break;
+        case "both";
+          $on = "creditId = poc.id OR $this->as.debitId";
+          break;
+        default;
+          pocError::create(400, "Bad Request", "Unknown field '$on'.");
+          return NULL;
+      }
+      #
+      if (!preg_match('/^[\w\d]+$/', $name)) {
+        pocError::create(400, "Bad Request", "Bad attribute name '$name'.");
+        return NULL;
+      }
+      #
+      if ($join)
+        $this->where($join);
+      if ($where)
+        $this->where($where, $whereMode);
+      #
+      if (pocError::hasError())
+        return NULL;
+      pocEnv::call("pocSelectInsertJoin", array($table, $this->as, $on, $class, $name));
+      $this->className = $class;
+    }
   }
 
   public function __get($key) {
@@ -208,6 +242,17 @@ class pocSelectJoin {
     if (!($whereMode == "AND" || $whereMode == "OR")) {
       pocError::create(400, "Bad Request", "Unknown where mode '$whereMode'.");
       return FALSE;
+    }
+    if ($this->className == "poc") {
+      if (is_a($where, "poc")) {
+        $where = "$this->as.id = $where->id";
+      } else {
+        if ($poc = poc::open($where)) {
+          $where = "$this->as.id = $poc->id";
+        } else {
+          pocError::fetch("pocSelectJoin: tried to open a poc");
+        }
+      }
     }
     if (preg_match('/^[\w\.]+$/', $where))
       $where = "$this->asContent = " . pocEnv::quote($where);

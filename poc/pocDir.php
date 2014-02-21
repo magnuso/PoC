@@ -14,11 +14,13 @@ http://poc-online.net/license
 class pocDir {
 
   private $path = "";
+  private $accept;
   private $files = array();
   private $directories = array();
 
   public function __construct($path, $accept = array()) {
     $this->path = $path;
+    $this->accept = $accept;
     if ($d = @dir($path)) {
       while (false !== ($entry = $d->read())) {
         if ($entry == "." || $entry == "..")
@@ -26,7 +28,7 @@ class pocDir {
         $f = $path ? "$path/$entry" : $entry;
         if (is_dir($f))
           $this->directories[$entry] = $f;
-        elseif ($this->accept($entry, $accept))
+        elseif ($this->accept($entry))
           $this->files[$entry] = $f;
       }
       ksort($this->directories);
@@ -41,15 +43,13 @@ class pocDir {
     return $this->$key;
   }
 
-  private function accept($entry, $accept) {
-    if (count($accept)) {
-      foreach ($accept as $a)
-        if (preg_match('/\\.$a\$/i', $entry))
-          return TRUE;
+  private function accept($entry) {
+    if (count($this->accept)) {
+      $entry = array_pop(explode(".", $entry));
+      return in_array($entry, $this->accept);
     } else {
       return TRUE;
     }
-    return FALSE;
   }
 
 }

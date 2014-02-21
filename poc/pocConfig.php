@@ -22,11 +22,11 @@ if (!pocEnv::started()) {
 
 #  pocEnv::$fixPath = TRUE; # in case $_ENV["PATH_INFO"] doesn't work ... check phpinfo();
 
-  pocEnv::$session["dbName"] = "record";
+  pocEnv::$session["dbName"] = "foccos02";
   pocEnv::$session["dbHost"] = "localhost";
   pocEnv::$session["dbPort"] = "";
-  pocEnv::$session["dbUser"] = "record";
-  pocEnv::$session["dbPassword"] = "UVn4r3YJV6zhzvvV";
+  pocEnv::$session["dbUser"] = "foccos02";
+  pocEnv::$session["dbPassword"] = "7xpyZRXQEmuS6V87";
   pocEnv::$session["dbOptions"] = array(); # NO, NO, NEVER EVER USE A PERSISTANT CONNECTION!!!!!!!!
 
   pocEnv::$session["sessionExpires"] = 1200; # 1200 sec = 20 min

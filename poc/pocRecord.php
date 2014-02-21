@@ -17,7 +17,7 @@ class pocRecord extends pocRow {
   #   uses pocEnv, pocDbh
 
   protected static $cache = array();
-  protected static $lastInserted = NULL;
+  protected static $lastOpened = NULL;
 
   protected $identifier;
   protected $insertFlag = FALSE;
@@ -50,8 +50,7 @@ class pocRecord extends pocRow {
         self::$cache[$this->identifier] = $this;
       }
     }
-    if ($this->insertFlag)
-      self::$lastInserted = $this;
+    self::$lastOpened = $this;
   }
 
   public function __toString() {
@@ -64,10 +63,10 @@ class pocRecord extends pocRow {
     $class = get_class($this);
     if ($proc = $class::getInsertProc()) {
       pocError::fetch("$class->insert($name)");
-      self::$lastInserted = NULL;
+      self::$lastOpened = NULL;
       $this->name = $name;
       pocEnv::call($proc, $this->this2params($class::getInsertParams()));
-      return self::$lastInserted;
+      return self::$lastOpened;
     }
   }
 
@@ -127,6 +126,8 @@ class pocRecord extends pocRow {
 
   protected static function getInsertParams() { return array("name", "title", "content"); }
   protected static function getUpdateParams() { return array("id", "name", "title", "content"); }
+
+  public static function getTableName() { return ""; }
 
   # create params
   protected static function getCreateParams() {
