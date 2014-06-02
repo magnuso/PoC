@@ -20,7 +20,7 @@ class pocSelect implements IteratorAggregate {
 
   public function __construct($poc = ".", $selectMode = "flat", $pocMode = poc::NO_MODE,
       $nameLike = "", $contentLike = "") {
-    if (!is_a($poc, "poc")) {
+    if (is_string($poc)) {
       if (!$poc = poc::open($poc)) {
         pocError::create(404, "Not Found", "pocSelect->__construct can't open poc: '$poc'.");
         return NULL;

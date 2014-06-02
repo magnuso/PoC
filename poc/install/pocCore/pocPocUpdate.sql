@@ -14,7 +14,7 @@ http://poc-online.net/license
 CREATE PROCEDURE pocPocUpdate (
     IN inId BIGINT,
     IN inName VARCHAR(64),
-    IN inTitle VARCHAR(64),
+    IN inTitle VARCHAR(255),
     IN inContent TEXT,
     IN inMode INT)
 BEGIN

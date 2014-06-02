@@ -44,6 +44,18 @@ class pocRow implements IPocRow {
 
   public function __set($key, $value) { }
 
+  # magic
+  public function __call($name, $params) {
+    if ($method = pocEnv::pocMagic(get_class($this), $name)) {
+      if ($method = $method->debit)
+        return $method->run($this, $params);
+      else
+        pocError::create(400, "Bad Request", "Magic Call: ::" . get_class($this) . "->$name(..)");
+    } else {
+      pocError::create(404, "Not Found", "Magic Call: ::" . get_class($this) . "->$name(..)");
+    }
+  }
+
   public function __toString() {
     return $this->content;
   }

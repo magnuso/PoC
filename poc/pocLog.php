@@ -118,7 +118,9 @@ class pocError extends pocRow {
     $this->returnRow = FALSE;
     parent::__construct($row);
     self::$errors[] = $this;
-    $this->content = "$this->id $this->name: $this->content";
+    if ($poc = pocRun::getLastRun())
+      $poc = "in poc '$poc'";
+    $this->content = "$this->id $this->name: $this->content $poc";
     pocWatch::create("Error Log", $this->content);
     if (count(self::$trace))
       $this->content .= " trace:" . PHP_EOL . "    " . implode(PHP_EOL . "    ", self::$trace);

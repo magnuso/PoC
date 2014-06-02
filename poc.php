@@ -11,6 +11,8 @@ http://www.poc-online.net/
 *******************************************************************************/
 
 ini_set('variables_order', 'EGPCS');
+ini_set('display_errors', 1);
+error_reporting(E_ALL ^ E_NOTICE);
 
 set_include_path('poc');
 

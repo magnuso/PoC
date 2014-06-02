@@ -17,7 +17,7 @@ CREATE PROCEDURE pocAttributeDoubleInsert (
     IN inCreditId BIGINT,
     IN inVoucherId BIGINT,
     IN inName VARCHAR(64),
-    IN inTitle VARCHAR(64),
+    IN inTitle VARCHAR(255),
     IN inContent DOUBLE,
     IN inValue DOUBLE)
 BEGIN

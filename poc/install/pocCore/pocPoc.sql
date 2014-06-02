@@ -25,7 +25,7 @@ CREATE TABLE pocPoc (
   otherPrivs SET('run', 'open', 'select', 'insert', 'update', 'delete'),
   mode SET('navi', 'search', 'cache'),
   name varchar(64) NOT NULL,
-  title varchar(64) NOT NULL,
+  title varchar(255) NOT NULL,
   content text NOT NULL,
   PRIMARY KEY (id) USING BTREE,
   UNIQUE KEY name (parentId, name)

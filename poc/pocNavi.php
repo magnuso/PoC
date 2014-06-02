@@ -18,7 +18,7 @@ class pocNavi implements IteratorAggregate {
   public $ignore = false;
 
   public function __construct($poc = ".", $mode = poc::NAVI_MODE) {
-    if (!is_a($poc, "poc")) {
+    if (is_string($poc)) {
       if (!$poc = poc::open($poc)) {
         pocError::create(404, "Not Found", "pocNavi->__construct can't open poc: '$poc'.");
         return NULL;

@@ -18,6 +18,7 @@ class pocRun {
   const ETC_INIT = "etc/init";
 
   private static $theTemplate = NULL;
+  private static $runStack = array();
 
   # run
   # runs a single poc. don't call. use $poc->run(...) instead.
@@ -26,10 +27,17 @@ class pocRun {
     if (is_a($poc, "poc") && $poc->runPriv) {
       pocError::mark("run($poc->path)");
       pocWatch::create("run", $poc->path);
-      return eval ("?>$poc->content");
+      self::$runStack[] = $poc->path;
+      $result = eval ("?>$poc->content");
+      array_pop(self::$runStack);
+      return $result;
     } else {
       pocError::create("die", "Abuse of pocRun::run()");
     }
+  }
+
+  public static function getLastRun() {
+    return end(self::$runStack);
   }
 
   # main
@@ -43,6 +51,8 @@ class pocRun {
     session_start();
     $watch->time("cookie");
 
+    set_error_handler("pocEnv::errorHandler");
+
     pocEnv::create(session_id());
 
     if (defined(_POC_SESSION_REGENERATE_ID_))
@@ -52,6 +62,8 @@ class pocRun {
     if ($poc = poc::open(self::ETC_INIT)) {
       foreach ($poc as $a)
         pocEnv::$env[$a->name] = $a->content;
+      if(pocEnv::$env["pocAutoload"])
+        pocEnv::initAutoload(pocEnv::$env["pocAutoload"]);
       if ($poc->runPriv)
         $poc->run();
       $watch->time("init");
@@ -60,13 +72,23 @@ class pocRun {
     if(!pocEnv::$env["PATH_INFO"])
       pocEnv::$env["PATH_INFO"] = pocEnv::$env["pocHome"];
 
-    # run
+    # redirect
     if ($poc = poc::open(".")) {
+      while ($redirectTo = $poc["_redirect"]->debit) {
+        $poc = $redirectTo;
+        pocEnv::$env["PATH_INFO"] = $poc->path;
+      }
+    }
+
+    # run
+    if ($poc) {
       self::runWithTemplate($poc);
       if (!pocError::hasError())
         pocEnv::quit();
       $watch->time("main run($poc->path) has error.");
     }
+
+    pocEnv::$env["pocError"] = pocError::fetch();
 
     # run error poc
     if ($poc = poc::open(pocEnv::$env["pocErrorPage"])) {

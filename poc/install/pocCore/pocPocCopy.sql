@@ -72,7 +72,8 @@ BEGIN
       DECLARE done INT DEFAULT FALSE;
       DECLARE theId, theParentId BIGINT DEFAULT 0;
       DECLARE theUserPrivs, theGroupPrivs, theOtherPrivs, theMode INT DEFAULT 0;
-      DECLARE theName, theTitle VARCHAR(64) DEFAULT '';
+      DECLARE theName VARCHAR(64) DEFAULT '';
+      DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent TEXT DEFAULT '';
       DECLARE walkCursor CURSOR FOR SELECT tp.id, tp.parentId,
           tp.userPrivs + 0, tp.groupPrivs + 0, tp.otherPrivs + 0, tp.mode + 0,
@@ -102,7 +103,8 @@ BEGIN
     charBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
       DECLARE theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
-      DECLARE theClassName, theName, theTitle VARCHAR(64) DEFAULT '';
+      DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
+      DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent VARCHAR(256) DEFAULT '';
       DECLARE theValue DOUBLE DEFAULT 0.0;
       DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
@@ -129,7 +131,8 @@ BEGIN
     doubleBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
       DECLARE theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
-      DECLARE theClassName, theName, theTitle VARCHAR(64) DEFAULT '';
+      DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
+      DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent, theValue DOUBLE DEFAULT 0.0;
       DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
         FROM pocTempSelect AS ts
@@ -155,7 +158,8 @@ BEGIN
     intBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
       DECLARE theContent, theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
-      DECLARE theClassName, theName, theTitle VARCHAR(64) DEFAULT '';
+      DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
+      DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theValue DOUBLE DEFAULT 0.0;
       DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
         FROM pocTempSelect AS ts
@@ -181,7 +185,8 @@ BEGIN
     textBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
       DECLARE theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
-      DECLARE theClassName, theName, theTitle VARCHAR(64) DEFAULT '';
+      DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
+      DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent TEXT DEFAULT '';
       DECLARE theValue DOUBLE DEFAULT 0.0;
       DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value

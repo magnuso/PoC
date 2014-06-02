@@ -86,7 +86,19 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
       else
         pocError::create(400, "Bad Request", "Magic Call: $this->path" . "->$name(..)");
     } else {
-      pocError::create(404, "Not Found", "Magic Call: $this->path" . "->$name(..)");
+      return parent::__call($name, $params);
+    }
+  }
+
+  public function callParent($that, $params) {
+    if ($listener = $this->climb(poc::MAGIC_DROP_QUEUE)) {
+      if ($listener = $listener->debit) {
+        if ($method = $listener->drop($this->name, self::MAGIC_DROP_QUEUE)) {
+          if ($method = $method->debit) {
+            return $method->run($that, $params);
+          }
+        }
+      }
     }
   }
 
@@ -133,6 +145,7 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
 
   # IteratorAggregate for attributes
   public function getIterator() {
+    uasort($this->attributesCache, function ($a, $b) { return strcmp($a->name, $b->name); } );
     return new ArrayIterator($this->attributesCache);
   }
 
@@ -161,15 +174,6 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
       return pocRun::run($this, func_get_args());
     else
       pocError::create(403, "Forbidden");
-  }
-
-  public function display() {
-    if ($this->updatePriv && preg_match('/<\w/', $this->content) && !preg_match('/<\?/', $this->content)) {
-      $div = pocTag::create("div", $this->content, array("class" => "pocEditDiv", "id" => $this->identifier, "contenteditable" => "TRUE"));
-      $div->run();
-    } else {
-      $this->run();
-    }
   }
 
   # db
@@ -280,6 +284,8 @@ class poc extends pocRecord implements ArrayAccess, IteratorAggregate {
       return new self();
     if (strval(intval($identifier)) == $identifier) {
       return parent::open(__CLASS__ . ":$identifier", $fresh);
+    } elseif (preg_match('/^poc:\d*/', $identifier)) {
+      return pocRecord::open($identifier);
     } else {
       $path = new pocPath($identifier);
       if (!$identifier = $path->path)

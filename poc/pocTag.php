@@ -32,11 +32,11 @@ class pocTag extends pocArray implements ArrayAccess {
     foreach ($this->params as $k => $v)
       $out .= " $k=\"$v\"";
     if ($this->content === NULL)
-      return $out . " />$tag[3]";
+      return "$out />";
     $out .= ">";
     foreach($this as $content)
       $out .= is_a($content, __CLASS__) ? $content->__toString() : ($this->isHtml ? $content : pocEnv::html($content));
-    return "$out$tag[3]</$tag[2]>";
+    return "$out" . ($tag[3] ? $tag[1] : "") . "</$tag[2]>";
   }
 
   # ArrayAccess

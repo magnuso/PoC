@@ -14,6 +14,7 @@ http://poc-online.net/license
 class pocEnv extends pocRow {
 
   private static $dbh = NULL;
+  private static $classesPoc = NULL;
   private static $singleton = NULL;
 
   public static $env = array();
@@ -164,6 +165,59 @@ class pocEnv extends pocRow {
   public static function makeHttpBase() {
     return strtolower(array_shift(explode("/", self::$env["SERVER_PROTOCOL"])))
       . "://" . self::$env["HTTP_HOST"] . self::$env["SCRIPT_NAME"];
+  }
+
+  # autoload
+  public static function initAutoload($path) {
+    if (self::$classesPoc)
+      return;
+    if ($poc = poc::open($path)) {
+      self::$classesPoc = $poc;
+      spl_autoload_register("pocEnv::autoload");
+      foreach (self::$classesPoc->select() as $p) {
+        if ($p->content && $p->runPriv)
+          class_exists($p->name);
+      }
+      spl_autoload_unregister("pocEnv::autoload");
+    } else {
+      pocError::create(400, "Bad Request", "initAutoload('$path'); failed.");
+    }
+  }
+
+  public static function autoload($className) {
+    if (!self::$classesPoc)
+      return;
+    if($className != "$className")
+      return;
+    if ($definition = poc::open(self::$classesPoc->path . "/$className")) {
+      $definition->run();
+    } else {
+      pocError::create(400, "Bad Request", "autoload('$className'); failed.");
+    }
+  }
+
+  public static function errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
+    if ($errno & error_reporting()) {
+      $poc = pocRun::getLastRun();
+      $poc = $poc ? " in poc '$poc'" : "";
+      echo "Error: $errno $errstr in $errfile in line $errline $poc" . PHP_EOL;
+    }
+  }
+
+  public static function pocMagic($className, $method) {
+    if (!self::$classesPoc)
+      return;
+    if ($poc = poc::open(self::$classesPoc->path . "/$className")) {
+      return $poc->drop($method, poc::MAGIC_DROP_QUEUE);
+    } else {
+      pocError::create(400, "Bad Request", "magic('$className'); failed on class.");
+    }
+  }
+
+  public static function getClasses($mode = poc::NAVI_MODE) {
+    if (!self::$classesPoc)
+      return;
+    return new pocSelect(self::$classesPoc, "flat", $mode);
   }
 
   # started

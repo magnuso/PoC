@@ -16,7 +16,7 @@ CREATE PROCEDURE pocAttributeCharUpdate (
     IN inDebitId BIGINT,
     IN inVoucherId BIGINT,
     IN inName VARCHAR(64),
-    IN inTitle VARCHAR(64),
+    IN inTitle VARCHAR(255),
     IN inContent VARCHAR(255),
     IN inValue DOUBLE)
 BEGIN

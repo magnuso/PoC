@@ -27,7 +27,7 @@ class pocImage {
 
   public function __construct($filename, $width = 0, $height = 0) {
     $this->filename = $filename;
-    if(!$info = getimagesize($filename)) {
+    if(!$info = @getimagesize($filename)) {
       pocError::create(400, "Bad Request", "pocImage: getimagesize($filename)");
       return NULL;
     }

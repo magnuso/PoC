@@ -31,8 +31,8 @@ class pocDir {
         elseif ($this->accept($entry))
           $this->files[$entry] = $f;
       }
-      ksort($this->directories);
-      ksort($this->files);
+      natcasesort($this->directories);
+      natcasesort($this->files);
     } else {
       pocError::create(404, "File not found: $path", "new pocDir($path)");
       return NULL;
@@ -41,6 +41,23 @@ class pocDir {
   
   public function __get($key) {
     return $this->$key;
+  }
+
+  public function delete() {
+    if ($d = @dir($this->path)) {
+      while (false !== ($entry = $d->read())) {
+        if ($entry == "." || $entry == "..")
+          continue;
+        $f = $path ? "$path/$entry" : $entry;
+        if (is_dir($f)) {
+          $f = new pocDir($f);
+          $f->delete();
+        } else {
+          @unlink($f);
+        }
+      }
+      @rmdir($this->path);
+    }
   }
 
   private function accept($entry) {
