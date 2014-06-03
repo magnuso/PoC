@@ -216,7 +216,10 @@ class pocEnv extends pocRow {
 
   public static function getClasses($mode = poc::NAVI_MODE) {
     if (!self::$classesPoc)
-      return;
+      return array(pocRow::create("pocAttributeChar", "Wort"),
+        pocRow::create("pocAttributeInt", "Ganzzahl"),
+        pocRow::create("pocAttributeDouble", "Fließkommazahl"),
+        pocRow::create("pocAttributeText", "Text"));
     return new pocSelect(self::$classesPoc, "flat", $mode);
   }
 

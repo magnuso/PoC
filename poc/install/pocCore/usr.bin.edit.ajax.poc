@@ -130,24 +130,28 @@ try {
         pocError::create(404, "Not Found", "PoC-Edit/ajax credit.");
         break;
       }
-      $newAttribute = $class::create(pocEnv::$request["name"], pocEnv::$request["title"], pocEnv::$request["content"], pocEnv::$request["value"]);
-      if ($debit = pocEnv::$request["debit"]) {
-        if ($debit = poc::open($debit)) {
-          $newAttribute->debit = $debit;
-        } else {
-          pocError::create(404, "Not Found", "PoC-Edit/ajax debit.");
-          break;
+      if (class_exists($class)) {
+        $newAttribute = $class::create(pocEnv::$request["name"], pocEnv::$request["title"], pocEnv::$request["content"], pocEnv::$request["value"]);
+        if ($debit = pocEnv::$request["debit"]) {
+          if ($debit = poc::open($debit)) {
+            $newAttribute->debit = $debit;
+          } else {
+            pocError::create(404, "Not Found", "PoC-Edit/ajax debit.");
+            break;
+          }
         }
-      }
-      if ($voucher = pocEnv::$request["voucher"]) {
-        if ($voucher = poc::open($voucher)) {
-          $newAttribute->voucher = $voucher;
-        } else {
-          pocError::create(404, "Not Found", "PoC-Edit/ajax voucher.");
-          break;
+        if ($voucher = pocEnv::$request["voucher"]) {
+          if ($voucher = poc::open($voucher)) {
+            $newAttribute->voucher = $voucher;
+          } else {
+            pocError::create(404, "Not Found", "PoC-Edit/ajax voucher.");
+            break;
+          }
         }
+        $thePoc[] = $newAttribute;
+      } else {
+        pocError::create(404, "Not Found", "PoC-Edit/ajax class not found '$class'.");
       }
-      $thePoc[] = $newAttribute;
       break;
 
     case "deleteAttributes": # delete pocs

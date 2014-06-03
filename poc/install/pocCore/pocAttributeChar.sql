@@ -30,5 +30,8 @@ CREATE TABLE pocAttributeChar (
   FOREIGN KEY (creditId) REFERENCES pocPoc(id) ON DELETE CASCADE
 ) ENGINE InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
 --
-INSERT INTO pocAttributeChar VALUES (1, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocHTTP', '', 'http://', 0.0);
-INSERT INTO pocAttributeChar VALUES (2, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocHome', '', 'www/home', 0.0);
+INSERT INTO pocAttributeChar VALUES (1, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocAutoload', '', 'usr/lib/classes', 0.0);
+INSERT INTO pocAttributeChar VALUES (2, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocErrorPage', '', 'www/error', 0.0);
+INSERT INTO pocAttributeChar VALUES (3, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocHTTP', '', 'http://', 0.0);
+INSERT INTO pocAttributeChar VALUES (4, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocHome', '', 'www/home', 0.0);
+INSERT INTO pocAttributeChar VALUES (5, 8, 0, 0, 0, 1, 0, 1, 'pocAttributeChar', 'pocUpload', '', 'upload', 0.0);

@@ -189,16 +189,15 @@ foreach ($thePoc->select() as $p) {
 -->
   <div id="attributesDiv" class="switchedDiv">
     <div class="functionBar">
+<?PHP
 
-      <select name="newAttribute" title="Neues Attribut" id="newAttributeClass" onchange="pocShowDialog('dialogNewAttribute');$(this).val(0);">
-        <option value="0">Neues Attribut:</option>
-        <option value="pocAttributeChar">Wort</option>
-        <option value="pocAttributeInt">Ganzzahl</option>
-        <option value="pocAttributeDouble">Fließkommazahl</option>
-        <option value="pocAttributeText">Text</option>
-        <option value="pocAttributeTag">Schlagwort</option>
-        <option value="pocAttributeSearch">Suchfeld</option>
-      </select>
+$select = pocTag::create("\n      select", NULL, array("name" => "newAttribute", "id" => "newAttributeClass", "onchange" => "pocShowDialog('dialogNewAttribute');$(this).val(0);"));
+$select->push(pocTag::create("\n        option", "Neues Attribut:", array("value" => "0")));
+foreach (pocEnv::getClasses() as $p)
+  $select->push(pocTag::create("\n        option", $p->getTitle, array("value" => $p->name)));
+$select->run();
+
+?>
       &bull;
       <input type="button" name="deleteAttributes" value="Löschen" onclick="pocDeleteAttributes();" />
 
@@ -211,10 +210,11 @@ foreach ($thePoc->select() as $p) {
           <th width="20%">Titel</th>
           <th width="10%">Inhalt</th>
           <th width="10%">Soll</th>
-          <th width="10%">Haben</th>
+          <th width="10%">Beleg</th>
           <th width="5%">Wert</th>
-          <th width="10%">geändert</th>
-          <th width="10%">von</th>
+          <th width="10%">class</th>
+          <th width="5%">geändert</th>
+          <th width="5%">von</th>
         <tr>
 <?PHP
 
@@ -231,6 +231,7 @@ foreach ($thePoc as $attribute) {
           <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:debit" value="<?PHP if ($p = $attribute->debit) echo $p->path; ?>" /></td>
           <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:voucher" value="<?PHP if ($p = $attribute->voucher) echo $p->path; ?>" /></td>
           <td><input class="pocInput mainInput rightText" name="<?PHP echo $attribute->identifier; ?>:value" value="<?PHP printf("%G", $attribute->value); ?>" /></td>
+          <td><?PHP echo $attribute->className; ?></td>
           <td><?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $p->modified); ?></td>
           <td><?PHP pocEnv::echoHtml($attribute->modifiedByName); ?></td>
         <tr>

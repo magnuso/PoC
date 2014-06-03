@@ -43,3 +43,10 @@ INSERT INTO pocPoc VALUES (8, 2, 1, 1, 0, 1, 0, 1, 'run,open,select,insert,updat
 INSERT INTO pocPoc VALUES (9, 3, 1, 1, 0, 1, 0, 1, 'run,open,select,insert,update,delete', 'run,open,select,insert,update,delete', '', '', 'user', 'User''s Home', '<h1>User''s Home</h1>');
 INSERT INTO pocPoc VALUES (10, 5, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', '', 'lib', '', '');
 INSERT INTO pocPoc VALUES (11, 5, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', '', 'bin', '', '');
+--
+INSERT INTO pocPoc VALUES (12, 10, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', '', 'classes', '', '');
+INSERT INTO pocPoc VALUES (13, 12, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', '', 'poc', '', '');
+INSERT INTO pocPoc VALUES (14, 12, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', 'navi', 'pocAttributeChar', 'Word', '');
+INSERT INTO pocPoc VALUES (15, 12, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', 'navi', 'pocAttributeDouble', 'Float', '');
+INSERT INTO pocPoc VALUES (16, 12, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', 'navi', 'pocAttributeInt', 'Integer', '');
+INSERT INTO pocPoc VALUES (17, 12, 1, 1, 0, 1, 0, 1, 'open,select,insert,update,delete', 'open,select,insert,update,delete', 'open,select', 'navi', 'pocAttributeText', 'Text', '');

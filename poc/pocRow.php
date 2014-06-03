@@ -87,7 +87,7 @@ class pocRow implements IPocRow {
 
   # static
   protected static function getCreateParams() {
-    return array("name" => "", "content" => "");
+    return array("name" => "", "title" => "", "content" => "");
   }
 
 }
