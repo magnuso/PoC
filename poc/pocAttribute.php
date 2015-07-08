@@ -20,7 +20,7 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
 
   protected $debitId = 0;
   protected $creditId = 0;
-  protected $voucherId = 0;
+  protected $receiptId = 0;
   protected $deleted = FALSE;
 
   public function __construct($row = array()) {
@@ -37,8 +37,8 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
         return poc::open($this->creditId);
       case "debit":
         return poc::open($this->debitId);
-      case "voucher":
-        return poc::open($this->voucherId);
+      case "receipt":
+        return poc::open($this->receiptId);
       case "get":
         return self::format($this->content);
       case "runPriv":
@@ -71,13 +71,13 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
           $this->debitId = 0;
         $this->update();
         break;
-      case "voucher":
+      case "receipt":
         if (is_a($value, "poc"))
-          $this->voucherId = $value->id;
+          $this->receiptId = $value->id;
         elseif ($poc = poc::open($value))
-          $this->voucherId = $poc->id;
+          $this->receiptId = $poc->id;
         else
-          $this->voucherId = 0;
+          $this->receiptId = 0;
         $this->update();
         break;
       default:
@@ -119,8 +119,8 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
   }
 
   # static
-  protected static function getInsertParams() { return array("className", "debitId", "creditId", "voucherId", "name", "title", "content", "value"); }
-  protected static function getUpdateParams() { return array("id", "debitId", "voucherId", "name", "title", "content", "value"); }
+  protected static function getInsertParams() { return array("className", "debitId", "creditId", "receiptId", "name", "title", "content", "value"); }
+  protected static function getUpdateParams() { return array("id", "debitId", "receiptId", "name", "title", "content", "value"); }
   protected static function getCreateParams() { return array("name" => "", "title" => "", "content" => "", "value" => 0.0); }
 
   # i/o

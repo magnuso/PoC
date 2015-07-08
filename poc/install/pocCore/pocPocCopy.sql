@@ -102,27 +102,27 @@ BEGIN
     -- walk attribute char
     charBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
-      DECLARE theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
+      DECLARE theCreditId, theDebitId, theReceiptId BIGINT DEFAULT 0;
       DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
       DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent VARCHAR(256) DEFAULT '';
       DECLARE theValue DOUBLE DEFAULT 0.0;
-      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
+      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.receiptId, ta.className, ta.name, ta.title, ta.content, ta.value
         FROM pocTempSelect AS ts
         JOIN pocAttributeChar AS ta ON ta.creditId = ts.id
         JOIN pocTempOldIds AS toc ON toc.oldId = ts.id;
       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
       OPEN attributeCursor;
       attributeLoop: LOOP
-        FETCH attributeCursor INTO theCreditId, theDebitId, theVoucherId, theClassName, theName, theTitle, theContent, theValue;
+        FETCH attributeCursor INTO theCreditId, theDebitId, theReceiptId, theClassName, theName, theTitle, theContent, theValue;
         IF done THEN
           LEAVE attributeLoop;
         END IF;
         SELECT IF(COUNT(*) > 0, newId, theDebitId) FROM pocTempOldIds WHERE oldId <=> theDebitId INTO theDebitId;
-        SELECT IF(COUNT(*) > 0, newId, theVoucherId) FROM pocTempOldIds WHERE oldId <=> theVoucherId INTO theVoucherId;
-        INSERT INTO pocAttributeChar (creditId, debitId, voucherId, created, createdById, modified, modifiedById,
+        SELECT IF(COUNT(*) > 0, newId, theReceiptId) FROM pocTempOldIds WHERE oldId <=> theReceiptId INTO theReceiptId;
+        INSERT INTO pocAttributeChar (creditId, debitId, receiptId, created, createdById, modified, modifiedById,
             className, name, title, content, value)
-          VALUES (theCreditId, theDebitId, theVoucherId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
+          VALUES (theCreditId, theDebitId, theReceiptId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
       END LOOP;
       CLOSE attributeCursor;
     END charBlock;
@@ -130,26 +130,26 @@ BEGIN
     -- walk attribute double
     doubleBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
-      DECLARE theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
+      DECLARE theCreditId, theDebitId, theReceiptId BIGINT DEFAULT 0;
       DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
       DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent, theValue DOUBLE DEFAULT 0.0;
-      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
+      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.receiptId, ta.className, ta.name, ta.title, ta.content, ta.value
         FROM pocTempSelect AS ts
         JOIN pocAttributeDouble AS ta ON ta.creditId = ts.id
         JOIN pocTempOldIds AS toc ON toc.oldId = ts.id;
       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
       OPEN attributeCursor;
       attributeLoop: LOOP
-        FETCH attributeCursor INTO theCreditId, theDebitId, theVoucherId, theClassName, theName, theTitle, theContent, theValue;
+        FETCH attributeCursor INTO theCreditId, theDebitId, theReceiptId, theClassName, theName, theTitle, theContent, theValue;
         IF done THEN
           LEAVE attributeLoop;
         END IF;
         SELECT IF(COUNT(*) > 0, newId, theDebitId) FROM pocTempOldIds WHERE oldId <=> theDebitId INTO theDebitId;
-        SELECT IF(COUNT(*) > 0, newId, theVoucherId) FROM pocTempOldIds WHERE oldId <=> theVoucherId INTO theVoucherId;
-        INSERT INTO pocAttributeDouble (creditId, debitId, voucherId, created, createdById, modified, modifiedById,
+        SELECT IF(COUNT(*) > 0, newId, theReceiptId) FROM pocTempOldIds WHERE oldId <=> theReceiptId INTO theReceiptId;
+        INSERT INTO pocAttributeDouble (creditId, debitId, receiptId, created, createdById, modified, modifiedById,
             className, name, title, content, value)
-          VALUES (theCreditId, theDebitId, theVoucherId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
+          VALUES (theCreditId, theDebitId, theReceiptId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
       END LOOP;
       CLOSE attributeCursor;
     END doubleBlock;
@@ -157,26 +157,26 @@ BEGIN
     -- walk attribute int
     intBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
-      DECLARE theContent, theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
+      DECLARE theContent, theCreditId, theDebitId, theReceiptId BIGINT DEFAULT 0;
       DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
       DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theValue DOUBLE DEFAULT 0.0;
-      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
+      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.receiptId, ta.className, ta.name, ta.title, ta.content, ta.value
         FROM pocTempSelect AS ts
         JOIN pocAttributeInt AS ta ON ta.creditId = ts.id
         JOIN pocTempOldIds AS toc ON toc.oldId = ts.id;
       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
       OPEN attributeCursor;
       attributeLoop: LOOP
-        FETCH attributeCursor INTO theCreditId, theDebitId, theVoucherId, theClassName, theName, theTitle, theContent, theValue;
+        FETCH attributeCursor INTO theCreditId, theDebitId, theReceiptId, theClassName, theName, theTitle, theContent, theValue;
         IF done THEN
           LEAVE attributeLoop;
         END IF;
         SELECT IF(COUNT(*) > 0, newId, theDebitId) FROM pocTempOldIds WHERE oldId <=> theDebitId INTO theDebitId;
-        SELECT IF(COUNT(*) > 0, newId, theVoucherId) FROM pocTempOldIds WHERE oldId <=> theVoucherId INTO theVoucherId;
-        INSERT INTO pocAttributeInt (creditId, debitId, voucherId, created, createdById, modified, modifiedById,
+        SELECT IF(COUNT(*) > 0, newId, theReceiptId) FROM pocTempOldIds WHERE oldId <=> theReceiptId INTO theReceiptId;
+        INSERT INTO pocAttributeInt (creditId, debitId, receiptId, created, createdById, modified, modifiedById,
             className, name, title, content, value)
-          VALUES (theCreditId, theDebitId, theVoucherId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
+          VALUES (theCreditId, theDebitId, theReceiptId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
       END LOOP;
       CLOSE attributeCursor;
     END intBlock;
@@ -184,27 +184,27 @@ BEGIN
     -- walk attribute text
     textBlock: BEGIN
       DECLARE done INT DEFAULT FALSE;
-      DECLARE theCreditId, theDebitId, theVoucherId BIGINT DEFAULT 0;
+      DECLARE theCreditId, theDebitId, theReceiptId BIGINT DEFAULT 0;
       DECLARE theClassName, theName VARCHAR(64) DEFAULT '';
       DECLARE theTitle VARCHAR(255) DEFAULT '';
       DECLARE theContent TEXT DEFAULT '';
       DECLARE theValue DOUBLE DEFAULT 0.0;
-      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.voucherId, ta.className, ta.name, ta.title, ta.content, ta.value
+      DECLARE attributeCursor CURSOR FOR SELECT toc.newId, ta.debitId, ta.receiptId, ta.className, ta.name, ta.title, ta.content, ta.value
         FROM pocTempSelect AS ts
         JOIN pocAttributeText AS ta ON ta.creditId = ts.id
         JOIN pocTempOldIds AS toc ON toc.oldId = ts.id;
       DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
       OPEN attributeCursor;
       attributeLoop: LOOP
-        FETCH attributeCursor INTO theCreditId, theDebitId, theVoucherId, theClassName, theName, theTitle, theContent, theValue;
+        FETCH attributeCursor INTO theCreditId, theDebitId, theReceiptId, theClassName, theName, theTitle, theContent, theValue;
         IF done THEN
           LEAVE attributeLoop;
         END IF;
         SELECT IF(COUNT(*) > 0, newId, theDebitId) FROM pocTempOldIds WHERE oldId <=> theDebitId INTO theDebitId;
-        SELECT IF(COUNT(*) > 0, newId, theVoucherId) FROM pocTempOldIds WHERE oldId <=> theVoucherId INTO theVoucherId;
-        INSERT INTO pocAttributeText (creditId, debitId, voucherId, created, createdById, modified, modifiedById,
+        SELECT IF(COUNT(*) > 0, newId, theReceiptId) FROM pocTempOldIds WHERE oldId <=> theReceiptId INTO theReceiptId;
+        INSERT INTO pocAttributeText (creditId, debitId, receiptId, created, createdById, modified, modifiedById,
             className, name, title, content, value)
-          VALUES (theCreditId, theDebitId, theVoucherId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
+          VALUES (theCreditId, theDebitId, theReceiptId, t, @pocUserId, t, @pocUserId, theClassName, theName, theTitle, theContent, theValue);
       END LOOP;
       CLOSE attributeCursor;
     END textBlock;

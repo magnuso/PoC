@@ -13,13 +13,17 @@ http://poc-online.net/license
 
 class pocSelect implements IteratorAggregate {
 
+  private static $count = 0;
+
+  private $id = 0;
   private $poc = NULL;
   private $pocMode = poc::NO_MODE;
   private $proc = "";
-  private $count = 0;
+#  private $count = 0;
 
   public function __construct($poc = ".", $selectMode = "flat", $pocMode = poc::NO_MODE,
       $nameLike = "", $contentLike = "") {
+    $this->id = ++self::$count;
     if (is_string($poc)) {
       if (!$poc = poc::open($poc)) {
         pocError::create(404, "Not Found", "pocSelect->__construct can't open poc: '$poc'.");
@@ -49,10 +53,14 @@ class pocSelect implements IteratorAggregate {
     pocEnv::call("pocSelectInit");
     if ($pocMode)
       $this->where("(poc.mode & $pocMode) > 0");
-    if ($nameLike)
+    if ($nameLike) {
+      $nameLike = pocEnv::quote($nameLike);
       $this->where("poc.name LIKE($nameLike)");
-    if ($contentLike)
+    }
+    if ($contentLike) {
+      $contentLike = pocEnv::quote($contentLike);
       $this->where("poc.content LIKE($contentLike)");
+    }
   }
 
   public function __get($key) {
@@ -162,7 +170,7 @@ class pocSelectJoin {
           break;
         case "debitId":
         case "creditId":
-        case "voucherId":
+        case "receiptId":
           $on .= ".$name";
           break;
         default:
@@ -197,7 +205,7 @@ class pocSelectJoin {
           break;
         case "creditId";
         case "debitId";
-        case "voucherId";
+        case "receiptId";
           break;
         case "both";
           $on = "creditId = poc.id OR $this->as.debitId";

@@ -482,7 +482,7 @@ if (!$thePoc->content || (!strpos(" $thePoc->content", '<?PHP') && (strpos($theP
               title: $( "#newAttributeTitle" ).val(),
               content: $( "#newAttributeContent" ).val(),
               debit: $( "#newAttributeDebit" ).val(),
-              voucher: $( "#newAttributeVoucher" ).val(),
+              receipt: $( "#newAttributeReceipt" ).val(),
               value: $( "#newAttributeValue" ).val()
             };
             $.post('<?PHP $u = new pocPath("./ajax"); echo $u->url; ?>', document.pocPostData).done( function(data) {

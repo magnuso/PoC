@@ -15,7 +15,7 @@ CREATE TABLE pocAttributeInt (
   id BIGINT NOT NULL auto_increment,
   creditId BIGINT NOT NULL,
   debitId BIGINT NOT NULL,
-  voucherId BIGINT NOT NULL,
+  receiptId BIGINT NOT NULL,
   created BIGINT NOT NULL,
   createdById BIGINT NOT NULL,
   modified BIGINT NOT NULL,
