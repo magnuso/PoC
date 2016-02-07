@@ -15,7 +15,7 @@ CREATE PROCEDURE pocAttributeCharInsert (
     IN inClass VARCHAR(64),
     IN inDebitId BIGINT,
     IN inCreditId BIGINT,
-    IN inReceiptId BIGINT,
+    IN inVoucherId BIGINT,
     IN inName VARCHAR(64),
     IN inTitle VARCHAR(255),
     IN inContent VARCHAR(255),
@@ -37,14 +37,14 @@ BEGIN
       SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeCharInsert debitId' AS content;
       LEAVE bodyOfProc;
     END IF;
-    IF inReceiptId > 0 AND pocPocPathFromId(inReceiptId) IS NULL THEN
-      SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeCharInsert receiptId' AS content;
+    IF inVoucherId > 0 AND pocPocPathFromId(inVoucherId) IS NULL THEN
+      SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeCharInsert voucherId' AS content;
       LEAVE bodyOfProc;
     END IF;
     -- finally
     SET t = UNIX_TIMESTAMP();
-    INSERT INTO pocAttributeChar (creditId, debitId, receiptId, created, createdById, modified, modifiedById, className, name, title, content, value)
-      VALUES (inCreditId, inDebitId, inReceiptId, t, @pocUserId, t, @pocUserId, inClass, inName, inTitle, inContent, inValue);
+    INSERT INTO pocAttributeChar (creditId, debitId, voucherId, created, createdById, modified, modifiedById, className, name, title, content, value)
+      VALUES (inCreditId, inDebitId, inVoucherId, t, @pocUserId, t, @pocUserId, inClass, inName, inTitle, inContent, inValue);
     SET newId = LAST_INSERT_ID();
     -- output
     SELECT 1 AS insertFlag, ta.*, tu.id AS userId, tu.name AS userName, @pocUserName AS createdByName, @pocUserName AS modifiedByName, tp.userPrivs, tp.groupPrivs, tp.otherPrivs, 

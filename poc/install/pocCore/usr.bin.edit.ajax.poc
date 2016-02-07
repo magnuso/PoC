@@ -140,11 +140,11 @@ try {
             break;
           }
         }
-        if ($receipt = pocEnv::$request["receipt"]) {
-          if ($receipt = poc::open($receipt)) {
-            $newAttribute->receipt = $receipt;
+        if ($voucher = pocEnv::$request["voucher"]) {
+          if ($voucher = poc::open($voucher)) {
+            $newAttribute->voucher = $voucher;
           } else {
-            pocError::create(404, "Not Found", "PoC-Edit/ajax receipt.");
+            pocError::create(404, "Not Found", "PoC-Edit/ajax voucher.");
             break;
           }
         }

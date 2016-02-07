@@ -14,7 +14,7 @@ http://poc-online.net/license
 CREATE PROCEDURE pocAttributeCharUpdate (
     IN inId BIGINT,
     IN inDebitId BIGINT,
-    IN inReceiptId BIGINT,
+    IN inVoucherId BIGINT,
     IN inName VARCHAR(64),
     IN inTitle VARCHAR(255),
     IN inContent VARCHAR(255),
@@ -42,12 +42,12 @@ BEGIN
       SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeCharUpdate debitId' AS content;
       LEAVE bodyOfProc;
     END IF;
-    IF inReceiptId > 0 AND pocPocPathFromId(inReceiptId) IS NULL THEN
-      SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeCharUpdate receiptId' AS content;
+    IF inVoucherId > 0 AND pocPocPathFromId(inVoucherId) IS NULL THEN
+      SELECT 404 AS id, 'Not Found' AS name, 'pocAttributeCharUpdate voucherId' AS content;
       LEAVE bodyOfProc;
     END IF;
     -- finally
-    UPDATE pocAttributeChar SET debitId = inDebitId, receiptId = inReceiptId,
+    UPDATE pocAttributeChar SET debitId = inDebitId, voucherId = inVoucherId,
       modified = UNIX_TIMESTAMP(), modifiedById = @pocUserId, name = inName, title = inTitle, content = inContent, value = inValue
       WHERE id = inId;
     -- output

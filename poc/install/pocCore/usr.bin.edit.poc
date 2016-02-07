@@ -229,7 +229,7 @@ foreach ($thePoc as $attribute) {
           <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:title" value="<?PHP pocEnv::echoHtml($attribute->title); ?>" /></td>
           <td><?PHP $i->run(); ?></td>
           <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:debit" value="<?PHP if ($p = $attribute->debit) echo $p->path; ?>" /></td>
-          <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:receipt" value="<?PHP if ($p = $attribute->receipt) echo $p->path; ?>" /></td>
+          <td><input class="pocInput mainInput" name="<?PHP echo $attribute->identifier; ?>:voucher" value="<?PHP if ($p = $attribute->voucher) echo $p->path; ?>" /></td>
           <td><input class="pocInput mainInput rightText" name="<?PHP echo $attribute->identifier; ?>:value" value="<?PHP printf("%G", $attribute->value); ?>" /></td>
           <td><?PHP echo $attribute->className; ?></td>
           <td><?PHP echo date(pocEnv::$env['pocDateTimeFormat'], $p->modified); ?></td>
@@ -422,7 +422,7 @@ foreach ($thePoc as $attribute) {
     <p><div class="spacer96">Titel:</div><input type="text" id="newAttributeTitle" name="newAttributeTitle" /></p>
     <p><div class="spacer96">Inhalt:</div><textarea id="newAttributeContent" name="newAttributeContent"></textarea></p>
     <p><div class="spacer96">Soll:</div><input type="text" id="newAttributeDebit" name="newAttributeDebit" /></p>
-    <p><div class="spacer96">Beleg:</div><input type="text" id="newAttributeReceipt" name="newAttributeReceipt" /></p>
+    <p><div class="spacer96">Beleg:</div><input type="text" id="newAttributeVoucher" name="newAttributeVoucher" /></p>
     <p><div class="spacer96">Wert:</div><input type="text" id="newAttributeValue" name="newAttributeValue" value="0.0" /></p>
     <div class="dialogBottomRight">
       <input type="button" onclick="pocHideDialog();" value="Abbrechen" />

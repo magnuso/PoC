@@ -14,7 +14,7 @@ http://poc-online.net/license
 class pocRecord extends pocRow {
 
   # dependencies:
-  #   uses pocEnv
+  #   uses pocEnv, pocDbh
 
   protected static $cache = array();
   protected static $lastOpened = NULL;
