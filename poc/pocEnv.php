@@ -49,7 +49,8 @@ class pocEnv extends pocRow {
     new self();
     #
     pocError::fetch("pocEnv::create()");
-    $sessionId = array_shift(func_get_args());
+    $func_args = func_get_args();
+    $sessionId = array_shift($func_args);
     # one more time UTF-8
     mb_internal_encoding(_POC_MB_ENCODING_);
     # fix $_REQUEST
@@ -163,7 +164,8 @@ class pocEnv extends pocRow {
 
   # http base
   public static function makeHttpBase() {
-    return strtolower(array_shift(explode("/", self::$env["SERVER_PROTOCOL"])))
+    $server_protocol = explode("/", self::$env["SERVER_PROTOCOL"]);
+    return strtolower(array_shift($server_protocol))
       . "://" . self::$env["HTTP_HOST"] . self::$env["SCRIPT_NAME"];
   }
 
