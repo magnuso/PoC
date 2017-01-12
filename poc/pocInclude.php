@@ -14,6 +14,7 @@ http://poc-online.net/license
 include "pocRow.php";
 include "pocLog.php";
 pocLog::create("start", "just included");
+include "pocError.php";
 include "pocTag.php";
 include "pocPDO.php";
 include "pocEnv.php";

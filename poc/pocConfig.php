@@ -12,6 +12,7 @@ http://poc-online.net/license
 *******************************************************************************/
 
 define("_POC_HTML_HEADER_", "Content-Type: text/html; charset=utf-8");
+define("_POC_XML_HEADER_", "Content-Type: text/xml; charset=utf-8");
 define("_POC_MB_ENCODING_", "UTF-8");
 
 if (!pocEnv::started()) {

@@ -16,6 +16,11 @@ class pocRun {
   const MIME_ATTRIBUTE_NAME = "_mime";
   const TEMPLATE_ATTRIBUTE_NAME = "_template";
   const ETC_INIT = "etc/init";
+  
+  const RUN_MODE_NORMAL = 0;
+  const RUN_MODE_CACHE = 1;
+  const RUN_MODE_SEARCH = 2;
+  const RUN_MODE_ROBOT = 3;
 
   private static $theTemplate = NULL;
   private static $runStack = array();
@@ -81,6 +86,7 @@ class pocRun {
     }
 
     # run
+    pocEnv::$env["runMode"] = pocRun::RUN_MODE_NORMAL;
     if ($poc) {
       self::runWithTemplate($poc);
       if (!pocError::hasError())

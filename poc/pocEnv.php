@@ -142,6 +142,10 @@ class pocEnv extends pocRow {
     return nl2br(htmlspecialchars($text));
   }
 
+  public static function nl2nl($text) {  # nice for js
+    return preg_replace("/\n/", '\n', $text);
+  }
+
   public static function echoHtml($text) {
     echo htmlspecialchars($text);
   }

@@ -91,10 +91,6 @@ abstract class pocAttribute extends pocRecord implements IteratorAggregate {
       return self::format($this->content);
   }
 
-  public function getiiiInput() {
-    return pocTag::create("input", NULL, array("value" => self::format($this->content), "name" => $this->identifier));
-  }
-
   # db
   public function insert($poc) {
     if (is_a($poc, "poc"))
@@ -176,10 +172,6 @@ class pocAttributeInt extends pocAttribute {
 /******************************************************************************/
 
 class pocAttributeText extends pocAttribute {
-
-  public function getiiiInput() {
-    return pocTag::create("textarea", self::format($this->content), array("name" => $this->identifier), FALSE);
-  }
 
   public static function getTableName() { return "pocAttributeText"; }
 
